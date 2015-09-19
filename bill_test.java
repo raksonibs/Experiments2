@@ -43,3 +43,24 @@ public class BillTest {
     bill.outputPrice();
   }
 }
+
+
+// boolean tryAgain = true;
+//       Scanner keyboard = new Scanner(System.in);
+//       while (tryAgain)
+//  {
+//           System.out.println("Enter month, day, and year");
+//           System.out.println("as three integers:");
+//  System.out.println("do not use commas or other punctuations.");
+//           int monthInput = keyboard.nextInt();
+//           int dayInput = keyboard.nextInt();
+//           int yearInput = keyboard.nextInt();
+//           if (dateOK(monthInput, dayInput, yearInput))
+// //  {
+// setDate(monthInput, dayInput, yearInput);
+// tryAgain = false;
+
+//           }
+//           else
+// System.out.println("Illegal date. Reenter input.");
+//       }
