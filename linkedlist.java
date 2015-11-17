@@ -196,6 +196,56 @@ public class LinkedList {
       return result;
     }
   }
+
+  private class LinkedListIterator implements Iterator<Character>
+  {
+    private Node currNode;
+    private Node prevNode;
+    
+    public LinkedListIterator() {
+      this.currNode = null;
+      this.prevNode = null;
+    }
+    
+    public boolean hasNext() {
+      if (this.currNode == null) {
+        return head != null;
+      } 
+      
+      return this.currNode.next != null;
+    }
+    
+    public Character next() {
+      if (!this.hasNext()) {
+//        throw new NoSuchElementException();
+      }
+      
+      this.prevNode = this.currNode;
+      
+      if (this.currNode == null) {
+        this.currNode = head;
+      } else {
+        this.currNode = this.currNode.next;
+      }
+      
+      return this.currNode.data;
+    }
+    
+    public void remove() {
+      if (this.prevNode == this.currNode) {
+    } 
+    
+    if (this.currNode == head) {
+      head = this.currNode.next;
+    } else {
+      this.prevNode.next = this.currNode.next;
+    }
+    
+    this.currNode = this.prevNode;
+    size--;
+    
+    
+  }
   
   
   
