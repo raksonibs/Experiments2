@@ -4,11 +4,20 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class webApp extends HttpServlet {
+  private Cookie createCookie(String cookieName, String cookieValue) {
+      Cookie cookie = new Cookie(cookieName, cookieValue);
+      cookie.setPath("/");
+      cookie.setMaxAge(1000000);
+      cookie.setHttpOnly(true);
+      cookie.setSecure(true);
+      return cookie;
+  }
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     System.out.println("helloworld!");
@@ -45,6 +54,16 @@ public class webApp extends HttpServlet {
     
     System.out.println("Approaching Redirect");
     DecimalFormat df = new DecimalFormat("#.##");
+    
+    Cookie[] cookies = req.getCookies();
+    
+    Cookie myCookie =
+          new Cookie("principle", principle.toString());
+          resp.addCookie(myCookie);
+          
+          Cookie myCookie2 =
+              new Cookie("period", period.toString());
+              resp.addCookie(myCookie);
     
     if (req.getPathInfo() != null && req.getPathInfo().equals("/YorkBank")) {
       System.out.println("Redirecting");
