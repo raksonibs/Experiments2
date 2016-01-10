@@ -1,6 +1,7 @@
 package example;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,13 +22,29 @@ public class webApp extends HttpServlet {
     System.out.println(req.getRequestURL());
     System.out.println(req.getServletPath());
     
+    Double principle;
+    Double period;
+    Double interest;
+    
+    principle = Double.parseDouble(this.getServletContext().getInitParameter("principle"));
+    period = Double.parseDouble(this.getServletContext().getInitParameter("period"));
+    interest = Double.parseDouble(this.getServletContext().getInitParameter("interest"));
+    
+    if (req.getParameter("principle") != null) principle = Double.parseDouble(req.getParameter("principle"));
+    if (req.getParameter("period") != null) period = Double.parseDouble(req.getParameter("period"));
+    if (req.getParameter("interest") != null) interest = Double.parseDouble(req.getParameter("interest"));
+    double compondThis = (1 + (interest/12));
+    double dividePrincipleBy = 1 - (Math.pow(compondThis, (-1*period)));
+    
+    double valueReturned = (interest/12) * principle/dividePrincipleBy;
+    
     System.out.println(req.getPathTranslated());
     System.out.println(req.getPathInfo());
     
     System.out.println(this.getServletContext().getContextPath());
-  
     
     System.out.println("Approaching Redirect");
+    DecimalFormat df = new DecimalFormat("#.##");
     
     if (req.getPathInfo() != null && req.getPathInfo().equals("/YorkBank")) {
       System.out.println("Redirecting");
@@ -36,6 +53,7 @@ public class webApp extends HttpServlet {
     } else {
       System.out.println("Not Redirecting");
       resp.getWriter().println("Testing Tomcat");
+      resp.getWriter().println("Monthly installments of: " + df.format(valueReturned));
     }
   
   }

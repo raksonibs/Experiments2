@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
   
+  <context-param>
+        <param-name>appName</param-name>
+        <param-value>OSAP Calculator</param-value>
+    </context-param>
+    <context-param>
+        <param-name>principle</param-name>
+        <param-value>1000</param-value>
+    </context-param>
+    <context-param>
+        <param-name>interest</param-name>
+        <param-value>0.10</param-value>
+    </context-param>
+    <context-param>
+        <param-name>period</param-name>
+        <param-value>30</param-value>
+    </context-param>
+    
+<error-page>
+        <error-code>404</error-code>
+        <location>/res/cust404.jspx</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.Exception</exception-type>
+        <location>/res/custException.jspx</location>
+    </error-page>
+  
   <servlet>
     <servlet-name>Test</servlet-name>
     <servlet-class>example.webApp</servlet-class>
@@ -10,11 +36,16 @@
     <servlet-name>
       Test
     </servlet-name>
+    <url-pattern>/test</url-pattern>
     <url-pattern>/Start</url-pattern>
+    <url-pattern>/Startup</url-pattern>
+    <url-pattern>/Startup/*</url-pattern>
   </servlet-mapping>
   <display-name>StudentCalc12</display-name>
   <welcome-file-list>
     <welcome-file>index.html</welcome-file>
+    <welcome-file>index</welcome-file>
+    <welcome-file>/Start</welcome-file>
     <welcome-file>index.htm</welcome-file>
     <welcome-file>index.jsp</welcome-file>
     <welcome-file>default.html</welcome-file>
