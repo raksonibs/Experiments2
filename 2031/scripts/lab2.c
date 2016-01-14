@@ -52,20 +52,27 @@ main() {
   number_games_played = number_of_games_won + number_of_games_lost + number_of_games_tied;
   printf("number_games_played %i\n", number_games_played);
 
-  if (number_of_games_won > 0 && number_of_games_tied > 0 && number_of_games_lost > 0 && number_games_played < 99)
+  if (number_of_games_won > 0 && number_of_games_tied > 0 && number_of_games_lost > 0 && number_games_played < 99) {
+    printf("Valid team\n");
 
     teams_points = (3 * number_of_games_won) + number_of_games_tied;
     printf("teams_points %i\n", teams_points);
-    if (streak > longest_wins)
+    if (streak > longest_wins) {
       longest_wins = streak;
+    }
 
-    if (teams_points > max_points)
+    if (teams_points > max_points) {
       max_points = teams_points;
-  else
-    if (number_games_played > 99)
+    }
+  } else {
+    printf("Invalid team\n");
+    if (number_games_played > 99) {
       printf("%s games played are more than 99\n", team_name);
-    else
+    }
+    else {
       printf("%s negative number of games\n", team_name);
+    }
+  }
 
   printf("File not done\n");
  }
