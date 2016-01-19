@@ -6,7 +6,7 @@ main() {
  
  char buffer[50];
  FILE *stream;
- stream = fopen("input_1.txt" , "rb");
+ stream = fopen("input_2.txt" , "rb");
  char * pch;
  int max_points = 0;
  int longest_wins = 0;
