@@ -165,7 +165,6 @@ main() {
     } else {
       // number
       printf("Numbering\n");
-      next_num = pch;
       printf("Numbering this number %s\n", pch);
       len = strlen(stack);
       printf("Length before add %d\n", len);
