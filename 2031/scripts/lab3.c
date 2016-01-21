@@ -28,6 +28,10 @@ main() {
  char string_val;
  int len;
  char str[15];
+ printf("Stack is %s\n", stack);
+
+ // problem with current code is with number like -7 or 35, string doesn't preserve it. need commas then break it up!
+
  while (fgets(buffer, sizeof buffer, stream) != NULL)
  {
   int i = 0;
@@ -47,6 +51,8 @@ main() {
     break;
   } else if (strcmp(pch, "+") == 0) {
     printf("Addinggg\n");
+    len = strlen(stack);
+    printf("Length of stack at start %d\n", len);
     printf("Last Val before addition: %c\n", stack[len - 1]);
     printf("Second Last Val before addition: %c\n", stack[len - 2]);
     printf("Trying to atoi\n");
@@ -59,16 +65,102 @@ main() {
     printf("Addition result: %d\n", result);
     sprintf(str, "%d", result);
     printf("Reassigning last two values to nill and setting result to final value: %s\n", str);
-    stack[len - 2] = '\0';
-    stack[len - 2] = '\0';
-    strcat(stack, result);
+    stack[len - 1] = '\0';
+    len = strlen(stack);
+    printf("Length of stack at after first subtract %d\n", len);
+
+    printf("stack is now: %s\n", stack);
+    printf("Reassigning the next nill\n");
+    stack[len - 1] = '\0';
+    printf("stack is now this: %s\n", stack);
+    len = strlen(stack);
+    printf("Length of stack at after second subtract %d\n", len);
+    strcat(stack, str);
     printf("Stack after actual math addition result %s\n", stack);
-  } else if (strcmp(pch, "-") == 0) {
-    printf("Subtracting\n");
-  } else if (strcmp(pch, "/") == 0) {
-    printf("Dividing\n");
-  } else if (strcmp(pch, "*") == 0) {
-    printf("Multiplying\n");
+    } else if (strcmp(pch, "-") == 0) {
+      printf("Subtracting\n");
+      len = strlen(stack);
+      printf("Length of stack at start %d\n", len);
+      printf("Last Val before subtraction: %c\n", stack[len - 1]);
+      printf("Second Last Val before subtraction: %c\n", stack[len - 2]);
+      printf("Trying to atoi\n");
+      last_num = stack[len - 1] - '0';
+      second_last_num = stack[len - 2] - '0';
+      printf("Successful atoi\n");
+      printf("Last Val before atoi subtraction: %d\n", last_num);
+      printf("Second Last Val before atoi subtraction: %d\n", second_last_num);
+      result = second_last_num - last_num;
+      printf("subtraction result: %d\n", result);
+      sprintf(str, "%d", result);
+      printf("Reassigning last two values to nill and setting result to final value: %s\n", str);
+      stack[len - 1] = '\0';
+      len = strlen(stack);
+      printf("Length of stack at after first subtract %d\n", len);
+
+      printf("stack is now: %s\n", stack);
+      printf("Reassigning the next nill\n");
+      stack[len - 1] = '\0';
+      printf("stack is now this: %s\n", stack);
+      len = strlen(stack);
+      printf("Length of stack at after second subtract %d\n", len);
+      strcat(stack, str);
+      printf("Stack after actual math subtraction result %s\n", stack);
+    } else if (strcmp(pch, "/") == 0) {
+      printf("Dividing\n");
+      len = strlen(stack);
+      printf("Length of stack at start %d\n", len);
+      printf("Last Val before dividing: %c\n", stack[len - 1]);
+      printf("Second Last Val before dividing: %c\n", stack[len - 2]);
+      printf("Trying to atoi\n");
+      last_num = stack[len - 1] - '0';
+      second_last_num = stack[len - 2] - '0';
+      printf("Successful atoi\n");
+      printf("Last Val before atoi dividing: %d\n", last_num);
+      printf("Second Last Val before atoi dividing: %d\n", second_last_num);
+      result = second_last_num / last_num;
+      printf("dividing result: %d\n", result);
+      sprintf(str, "%d", result);
+      printf("Reassigning last two values to nill and setting result to final value: %s\n", str);
+      stack[len - 1] = '\0';
+      len = strlen(stack);
+      printf("Length of stack at after first subtract %d\n", len);
+
+      printf("stack is now: %s\n", stack);
+      printf("Reassigning the next nill\n");
+      stack[len - 1] = '\0';
+      printf("stack is now this: %s\n", stack);
+      len = strlen(stack);
+      printf("Length of stack at after second subtract %d\n", len);
+      strcat(stack, str);
+      printf("Stack after actual math dividing result %s\n", stack);
+    } else if (strcmp(pch, "*") == 0) {
+      printf("Multiplying\n");
+      len = strlen(stack);
+      printf("Length of stack at start %d\n", len);
+      printf("Last Val before multiplying: %c\n", stack[len - 1]);
+      printf("Second Last Val before multiplying: %c\n", stack[len - 2]);
+      printf("Trying to atoi\n");
+      last_num = stack[len - 1] - '0';
+      second_last_num = stack[len - 2] - '0';
+      printf("Successful atoi\n");
+      printf("Last Val before atoi multiplying: %d\n", last_num);
+      printf("Second Last Val before atoi multiplying: %d\n", second_last_num);
+      result = last_num * second_last_num;
+      printf("multiplying result: %d\n", result);
+      sprintf(str, "%d", result);
+      printf("Reassigning last two values to nill and setting result to final value: %s\n", str);
+      stack[len - 1] = '\0';
+      len = strlen(stack);
+      printf("Length of stack at after first subtract %d\n", len);
+
+      printf("stack is now: %s\n", stack);
+      printf("Reassigning the next nill\n");
+      stack[len - 1] = '\0';
+      printf("stack is now this: %s\n", stack);
+      len = strlen(stack);
+      printf("Length of stack at after second subtract %d\n", len);
+      strcat(stack, str);
+      printf("Stack after actual math multiplying result %s\n", stack);
   } else {
     // number
     printf("Numbering\n");
