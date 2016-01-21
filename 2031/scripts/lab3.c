@@ -15,7 +15,7 @@ main() {
  FILE *stream;
  stream = fopen("input_3.txt" , "rb");
  char * number;
- char * stack[50];
+ char stack[50];
  int count = 1;
  int last_num;
  int second_last_num;
@@ -35,16 +35,11 @@ main() {
   pch = strtok (buffer,"\n");
   printf("Buffer here: %s\n", pch);
   printf("Length - 1 calc: %d\n", len - 1);
-  for (i=0; i < len; i++)
-    {
-        printf("%c\n", stack[i]);
-        last_value = stack[i];
-    }
-  printf("Last Val before going into anything: %c\n", last_value);
+  printf("Last Val before going into anything: %c\n", stack[len - 1]);
 
   if (strcmp(pch, "p") == 0) {
     printf("Printing\n");
-    printf("Last Val in print loop: %c\n", last_value);
+    printf("Last Val in print loop: %c\n", stack[len - 1]);
   } else if (strcmp(pch, "q") == 0) {
     printf("Quiting\n");
     break;
@@ -68,14 +63,10 @@ main() {
     // printf("String copied output %s\n", str);
     strcat(stack, pch);
     len = strlen(stack);
-     for (i=0; i < len; i++)
-    {
-        last_value = stack[i];
-    }
     printf("Length after add %d\n", len);
     printf("Length - 1 calc: %d\n", len - 1);
     printf("Stack after addition %s\n", stack);
-    printf("Last val after addition %c\n", last_value);
+    printf("Last val after addition %c\n", stack[len - 1]);
   }
 
   printf("next line \n\n");
