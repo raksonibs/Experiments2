@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+char* stradd(const char* a, const char* b){
+    size_t len = strlen(a) + strlen(b);
+    char *ret = (char*)malloc(len * sizeof(char) + 1);
+    *ret = '\0';
+    return strcat(strcat(ret, a) ,b);
+}
 
 main() {
   printf("Starting program\n");
@@ -9,10 +15,11 @@ main() {
  FILE *stream;
  stream = fopen("input_3.txt" , "rb");
  char * number;
- char * stack[50] = {};
+ char * stack[50];
  int count = 1;
  int last_num;
  int second_last_num;
+ char * last_value;
  int result;
  char * pch;
  int second_count = 0;
@@ -21,15 +28,23 @@ main() {
  int len;
  while (fgets(buffer, sizeof buffer, stream) != NULL)
  {
+  int i = 0;
   len = strlen(stack);
   printf("Length of stack at start %d\n", len);
+  printf("Stack before addition %s\n", stack);
   pch = strtok (buffer,"\n");
   printf("Buffer here: %s\n", pch);
-  printf("Last Val before going into anything: %c\n", stack[len - 1]);
+  printf("Length - 1 calc: %d\n", len - 1);
+  for (i=0; i < len; i++)
+    {
+        printf("%c\n", stack[i]);
+        last_value = stack[i];
+    }
+  printf("Last Val before going into anything: %c\n", last_value);
 
   if (strcmp(pch, "p") == 0) {
     printf("Printing\n");
-    printf("Last Val: %c\n", stack[len - 1]);
+    printf("Last Val in print loop: %c\n", last_value);
   } else if (strcmp(pch, "q") == 0) {
     printf("Quiting\n");
     break;
@@ -46,16 +61,21 @@ main() {
     printf("Numbering\n");
     next_num = pch;
     printf("Numbering this number %s\n", pch);
-    strcat(stack, pch);
-    int i = 0;
     len = strlen(stack);
     printf("Length before add %d\n", len);
-    printf("Stack after addition %s\n", stack);
-    printf("Last val after addition %c\n", stack[len - 1]);
+    printf("Length - 1 calc: %d\n", len - 1);
+    // char *str = stradd(stack, pch);
+    // printf("String copied output %s\n", str);
+    strcat(stack, pch);
     len = strlen(stack);
+     for (i=0; i < len; i++)
+    {
+        last_value = stack[i];
+    }
     printf("Length after add %d\n", len);
-    count = count + 1;
-    second_count = second_count + 1;
+    printf("Length - 1 calc: %d\n", len - 1);
+    printf("Stack after addition %s\n", stack);
+    printf("Last val after addition %c\n", last_value);
   }
 
   printf("next line \n\n");
