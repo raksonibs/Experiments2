@@ -23,60 +23,28 @@ main() {
 
   pch = strtok (buffer," ");
   printf("Buffer here: %s\n", pch);
-  printf("Last Val: %d\n", stack[count]);
+  printf("Last Val: %s\n", stack[count]);
 
   if (strcmp(pch, "p") == 0) {
     printf("Printing\n");
-    printf("Last Val: %d\n", stack[count]);
+    printf("Last Val: %s\n", stack[count]);
   } else if (strcmp(pch, "q") == 0) {
     printf("Quiting\n");
     break;
   } else if (strcmp(pch, "+") == 0) {
     printf("Adding\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num + second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else if (strcmp(pch, "-") == 0) {
     printf("Subtracting\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num - second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else if (strcmp(pch, "/") == 0) {
     printf("Dividing\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num / second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else if (strcmp(pch, "*") == 0) {
     printf("Multiplying\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num * second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else {
     // number
     printf("Numbering\n");
     next_num = pch;
     stack[count] = next_num;
-    printf("Last val after addition %d\n", stack[count]);
+    printf("Last val after addition %s\n", stack[count]);
     count = count + 1;
     second_count = second_count + 1;
   }
