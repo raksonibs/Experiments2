@@ -9,7 +9,7 @@ main() {
  FILE *stream;
  stream = fopen("input_3.txt" , "rb");
  char * number;
- char * stack[50];
+ char * stack[50] = {};
  int count = 1;
  int last_num;
  int second_last_num;
@@ -18,65 +18,42 @@ main() {
  int second_count = 0;
  int next_num;
  char string_val;
+ int len;
  while (fgets(buffer, sizeof buffer, stream) != NULL)
  {
-
-  pch = strtok (buffer," ");
+  len = strlen(stack);
+  printf("Length of stack at start %d\n", len);
+  pch = strtok (buffer,"\n");
   printf("Buffer here: %s\n", pch);
-  printf("Last Val: %d\n", stack[count]);
+  printf("Last Val before going into anything: %c\n", stack[len - 1]);
 
   if (strcmp(pch, "p") == 0) {
     printf("Printing\n");
-    printf("Last Val: %d\n", stack[count]);
+    printf("Last Val: %c\n", stack[len - 1]);
   } else if (strcmp(pch, "q") == 0) {
     printf("Quiting\n");
     break;
   } else if (strcmp(pch, "+") == 0) {
     printf("Adding\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num + second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else if (strcmp(pch, "-") == 0) {
     printf("Subtracting\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num - second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else if (strcmp(pch, "/") == 0) {
     printf("Dividing\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num / second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else if (strcmp(pch, "*") == 0) {
     printf("Multiplying\n");
-    last_num = atoi(stack[count]);
-    second_last_num = atoi(stack[second_count]);
-    stack[count] = NULL;
-    stack[second_count] = NULL;
-    result = last_num * second_last_num;
-    stack[second_count] = result;
-    second_count = second_count - 2;
-    count = count - 1;
   } else {
     // number
     printf("Numbering\n");
     next_num = pch;
-    stack[count] = next_num;
-    printf("Last val after addition %d\n", stack[count]);
+    printf("Numbering this number %s\n", pch);
+    strcat(stack, pch);
+    int i = 0;
+    len = strlen(stack);
+    printf("Length before add %d\n", len);
+    printf("Stack after addition %s\n", stack);
+    printf("Last val after addition %c\n", stack[len - 1]);
+    len = strlen(stack);
+    printf("Length after add %d\n", len);
     count = count + 1;
     second_count = second_count + 1;
   }
