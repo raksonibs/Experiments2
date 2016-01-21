@@ -20,12 +20,14 @@ main() {
  int last_num;
  int second_last_num;
  char * last_value;
+ char * second_last_value;
  int result;
  char * pch;
  int second_count = 0;
  int next_num;
  char string_val;
  int len;
+ char str[15];
  while (fgets(buffer, sizeof buffer, stream) != NULL)
  {
   int i = 0;
@@ -44,7 +46,23 @@ main() {
     printf("Quiting\n");
     break;
   } else if (strcmp(pch, "+") == 0) {
-    printf("Adding\n");
+    printf("Addinggg\n");
+    printf("Last Val before addition: %c\n", stack[len - 1]);
+    printf("Second Last Val before addition: %c\n", stack[len - 2]);
+    printf("Trying to atoi\n");
+    last_num = stack[len - 1] - '0';
+    second_last_num = stack[len - 2] - '0';
+    printf("Successful atoi\n");
+    printf("Last Val before atoi addition: %d\n", last_num);
+    printf("Second Last Val before atoi addition: %d\n", second_last_num);
+    result = last_num + second_last_num;
+    printf("Addition result: %d\n", result);
+    sprintf(str, "%d", result);
+    printf("Reassigning last two values to nill and setting result to final value: %s\n", str);
+    stack[len - 2] = '\0';
+    stack[len - 2] = '\0';
+    strcat(stack, result);
+    printf("Stack after actual math addition result %s\n", stack);
   } else if (strcmp(pch, "-") == 0) {
     printf("Subtracting\n");
   } else if (strcmp(pch, "/") == 0) {
