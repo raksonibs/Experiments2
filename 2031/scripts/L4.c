@@ -1,34 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-void main() {
-  char buffer[20];
-  FILE *stream;
-  stream = fopen("../../dictionary.txt" , "rb");
-  char * pch;
-  char words[200] = {};
-  int count = 0;
-
-  printf("%d\n", sizeof(words));
-  while (fgets(buffer, sizeof buffer, stream) != NULL) {
-    printf("%s\n", buffer);
-    pch = strtok(buffer, "\n");
-    words[count] = pch;
-    count += 1;
-    printf("%s\n", words);
-  }
-  if (feof(stream))
-  {     
-  }
-  else
-  {   
-    printf("File error\n");
+ 
+int main(void) {
+  int i = 0;
+  char* string[200];
+  char line[21];
+  char* c;
+  bool match = false;
+   
+  FILE *file; 
+  file = fopen("../../dictionary.txt", "r"); 
+   
+  while(fgets(line, sizeof line, file)!=NULL) {
+    printf("%s", line);
+    string[i]=line;
+    printf("%s", string[i]);
+    i++;
   }
 
-  printf("Done\n");
+  while ((c = getchar()) != EOF) {
+    printf("Looking for %c\n", c);
+    for (i = 0; i < 200; ++i)
+    {
+      printf("Looking at %s\n", string[i]);
+      if (string[i] == c) {
+        printf("match");
+        match = true;
+      }
+    }
 
-  printf("%s\n", words);
+    if (match) {
+      printf("Error: %s\n", c);
+    } 
+  }
 
+  printf("%s\n", string[0]);
+  printf("%s\n", string[1]);
+  printf("%c\n", string[2]);
 
+  fclose(file);
+  return 0;
 }
