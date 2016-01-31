@@ -1,6 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+int lookForMatch(char* pch, char str1, int match, char* words) {
+  for (int i = 0; i < 200; ++i)
+  {
+    if (strcmp(words[i], str1) == 0) {        
+      match = 1;
+      break;        
+    }
+  }
+
+  if (match == 0) {
+    printf("Error: %s\n", str1);
+  } else {
+    printf("There was a match\n");
+    printf("Try again\n");
+  }
+
+  return match;
+}
+
  
 int main(void) {
   int i = 0;
@@ -19,20 +39,27 @@ int main(void) {
     i++;
   }            
 
-  while (scanf("%s", &str1) != EOF ) {        
-    for (i = 0; i < 200; ++i)
-    {      
-      if (strcmp(words[i], str1) == 0) {        
-        match = 1;
-        break;        
+  while (scanf("%s", &str1) != EOF ) {  
+    pch = strtok(str1, " ");    
+    while (pch != NULL)
+    {
+      match = 0;
+      // lookForMatch(pch, str1, match, words);
+      for (i = 0; i < 200; ++i)
+      {
+        if (strcmp(words[i], str1) == 0) {        
+          match = 1;
+          break;        
+        }
       }
-    }
 
-    if (match == 0) {
-      printf("Error: %s\n", str1);      
-    } else {
-      break;
-    }
+      if (match == 0) {
+        printf("Error: %s\n", str1);
+        break;
+      } else {
+        break;
+      }
+    }  
   }   
 
   fclose(file);
