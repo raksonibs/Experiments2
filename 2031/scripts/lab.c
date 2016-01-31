@@ -2,9 +2,9 @@
 
 void main() {
 
-  int string, sum = 0;
+  int i, sum = 0;
 
-  while((scanf("%s", &string)) ) {
+  while((scanf("%d", &i) > 0) ) {
     if (i < 0) {
       break;
     }
