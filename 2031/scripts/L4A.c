@@ -20,7 +20,7 @@ int main(void) {
   }            
 
   while (scanf("%s", &str1) != EOF ) {  
-    pch = strtok(str1, " ");    
+    pch = strtok(str1, " ,\.\s\n\t");    
     while (pch != NULL)
     {
       match = 0;
