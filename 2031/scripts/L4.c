@@ -1,42 +1,39 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
  
 int main(void) {
   int i = 0;
-  char* string[200];
+  char* words[200][21];
   char line[21];
-  char* c;
-  bool match = false;
+  char* pch;
+  char str1[21];
+  int match = 0;
    
   FILE *file; 
-  file = fopen("../../dictionary.txt", "r"); 
+  file = fopen("../../dictionary.txt", "r");
    
-  while(fgets(line, sizeof line, file)!=NULL) {
-    printf("%s", line);
-    string[i]=line;
-    printf("%s", string[i]);
+  while(fgets(line, sizeof line, file) != NULL) {
+    pch = strtok (line, "\n");    
+    strcpy(words[i], pch);    
     i++;
-  }
+  }            
 
-  while ((c = getchar()) != EOF) {
-    printf("Looking for %c\n", c);
+  while (scanf("%s", &str1) != EOF ) {        
     for (i = 0; i < 200; ++i)
-    {
-      printf("Looking at %s\n", string[i]);
-      if (string[i] == c) {
-        printf("match");
-        match = true;
+    {      
+      if (strcmp(words[i], str1) == 0) {        
+        match = 1;
+        break;        
       }
     }
 
-    if (match) {
-      printf("Error: %s\n", c);
-    } 
-  }
-
-  printf("%s\n", string[0]);
-  printf("%s\n", string[1]);
-  printf("%c\n", string[2]);
+    if (match == 0) {
+      printf("Error: %s\n", str1);      
+    } else {
+      break;
+    }
+  }   
 
   fclose(file);
   return 0;
