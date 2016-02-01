@@ -11,7 +11,7 @@ int main(void) {
   int match = 0;
    
   FILE *file; 
-  file = fopen("../../dictionary.txt", "r");
+  file = fopen("./../../dictionary.txt", "r");
    
   while(fgets(line, sizeof line, file) != NULL) {
     pch = strtok (line, "\n");    
