@@ -20,21 +20,21 @@ int main(void) {
   }            
 
   while (scanf("%s", &str1) != EOF ) {  
-    pch = strtok(str1, " ");    
+    pch = strtok(str1, " \n");    
     while (pch != NULL)
     {
       match = 0;
       // lookForMatch(pch, str1, match, words);
       for (i = 0; i < 200; ++i)
       {
-        if (strcmp(words[i], str1) == 0) {        
+        if (strcmp(words[i], pch) == 0) {        
           match = 1;
           break;        
         }
       }
 
       if (match == 0) {
-        printf("Error: %s\n", str1);
+        printf("Error: %s\n", pch);
         break;
       } else {
         break;
