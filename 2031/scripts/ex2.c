@@ -1,20 +1,35 @@
-#include <stdio.h~
-1*countdigits,whitespace,others*1 maine )
-{
+#include <stdio.h>
+#include <string.h>
+
+int getline(char line[]);
+
+int main() {
+
+  char line[2000];
+
+  char currentFinal[10000] = "";
+  int len;
+
+  while ((len = getline(line)) > 0) {
+    // if (stringmatch(line, match)) {
+      strcat(currentFinal, line);
+    // }
+  }
+
+  printf("%s", currentFinal);
+
+  return 0;
 }
-The output
-nwhite, nother);
-of this program on itself is
-int c, i, nwhite, nother; int ndigit[10];
-nwhite =nother =0;
-for (i = 0; i < 10; ++i)
-ndigit[i] =0;
-while «c = getchar(» 1= EOF) if(c>= '0'&&c<= '9')
-++ndigit[c-'O'];
-e1se if (c== ' ,I I c == '\n' I I c == '\t')
-++nwhite; ~lse
-++nother;
-printf("digits =");
-for (i =0; i < 10; ++i)
-printf(" %<i", ndigit[i]);
-printf(", white space::;%d, other =%d\n",
+
+int getline(char s[])
+{
+    int c, i;
+    for (i=0; i < (c=getchar())!=EOF && c!='\n'; ++i)
+        s[i] = c;
+    if (c == '\n') {
+        s[i] = c;
+        ++i;
+    }
+    s[i] = '\0';
+    return i;
+}
