@@ -1,0 +1,8 @@
+Student first name, last name, email address, three test scores
+Oskar Niburski oskarniburski@gmail.com 100 50 75
+Kacper Nig kacperniburski@gmail.com 80 60 45
+Claire Notde claireniburski@gmail.com 50 100 98
+Claire Notde claireniburski@gmail.com 50 100 98
+Cat Notde cateniburski@gmail.com 50 100 98
+Dog Notde dogniburski@gmail.com 50 100 98
+Parrent Notde parrotniburski@gmail.com 50 100 98
