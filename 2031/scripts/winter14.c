@@ -16,6 +16,7 @@ main() {
   int words = 0;
   int totalWords = 0;
   int i = 0;
+  // should use pch for whitespace appreciation next, not by input, just check each pch for char!
   for (i=0; i <strlen(input) ;i++) {
     if (input[i] == '.') {
       totalWords += wordLength;
