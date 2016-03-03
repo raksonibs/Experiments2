@@ -46,6 +46,6 @@ main() {
   }
   int k=0;
   for (k=0; k < 12;k++) {
-    printf("%s\n", students[k].first_name);
+    printf("%s\n", students[k].test_1);
   }
 }
