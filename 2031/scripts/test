@@ -1,0 +1,40 @@
+#!/bin/bash
+
+echo "Hello World"
+
+echo -n "Helloer
+World"
+
+myvar=abc
+echo "Test 1 ====="
+echo $myvar
+
+echo $?
+echo $$
+echo $*
+echo $#
+echo $0
+echo ${v-goodbye}
+v=4
+echo ${v-goodbye}
+
+
+echo $a
+echo $b
+echo $c
+
+let a=15+5
+echo $a
+
+N=`echo "scale=13; 13 /3" |bc`
+echo $N
+
+set apple banna cherry
+echo $1, $2, $3
+
+# returns true
+[ $1 != apple ]
+echo $?
+# returns falss
+[ $1 != Toe ]
+echo $?
