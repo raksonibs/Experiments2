@@ -1,5 +1,3 @@
-# java_code
+# Experiments
 
-Hosting some code I make with java.
-
-Class orientated.
+More things I play around with. Focus here is C, Java, and other stuff.
