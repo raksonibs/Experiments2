@@ -23,6 +23,8 @@
 now=$(date +"%m_%d_%Y")
 mon=`date +%m`
 
+# if [ ${file: -4} == ".txt" ]
+
 filename="$0"
 echo "$now"
 echo "${mon:1:${#mon}-1}"
