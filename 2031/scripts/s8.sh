@@ -6,3 +6,6 @@ if [ ! -z "$1" ]; then
   name=`${m:1}`
   file=`${1: -4}`
 fi
+
+base=${1%.*}
+extenstion=${1#*.}

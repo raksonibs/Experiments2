@@ -21,7 +21,7 @@ else
           lname=${arr[2]}
           # echo "$parr[1]"
           # echo "Looking for in $parr"
-          line=`cat "$2" | grep $key`
+          line=`cat "$2" | grep "$key"`
           sarr=($line)
           score=${sarr[2]}
           let counter=counter+1
