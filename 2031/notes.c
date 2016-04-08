@@ -44,3 +44,22 @@ if(fp == NULL) {printf (…); exit }
 // gets reads character tille new line, fgsets reals till newline or n-1 character, if newline added to string
 //fseek set file position for stream pointed to by stream. the new postion, measured in bytes from beginnig, shall be.
 //fscanf and printf with first paramater as file pointer, but error may be feof(fp) end of file or read error, both retugning nonzero value, or even a matching error
+// generate bug-free code by genreationg from correct program
+// test every piece. random inputs.
+// blackbox testing-> assume no knowledge of implementation. 
+// glassbox-> assume full knowledge of the program
+// regression testing -> when fix bug, introduce more. fix that bug, may break fix. WHen you create a test, keep it and when fix a bug, apply all other tests
+//boundary condition testing 
+char s[MAX];
+for(i=0; s[i] = (getchar()) != ‘\n’ && i<MAX-1; ++i)
+;
+s[--i]=‘\0’;
+// after
+int i;
+char s[MAX];
+for(i=0; i<MAX-1; i++)
+if((s[i]=getchar()) == ‘\n’ || s[i] == EOF);
+break;
+s[i]=‘\0’;
+
+// can use assertions in #inlcude <assert.h>
