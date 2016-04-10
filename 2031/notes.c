@@ -337,6 +337,116 @@ struct dimension *tables;
 tables = (struct dimension*) malloc
 (20*sizeoff(struct dimension));
 
+// nested structus
+struct point { int x, int;}
+struct line {
+  struct point a;
+  struct point b;
+} myline;
+
+mylinfe.a.x = 0;
+myline.a.y=5;
+
+//define a new type of type with typedef ex:
+typedef struct {
+  int x,y;
+} newtype;
+
+// newtype a1,b1; now new type is a type in C just like int and float
+
+union value {
+  int i;
+  char c;
+}
+
+// similir to sturct but all variables have same memory location and accessed differntly
+unin value v;
+c.i = 45;
+
+enum state {
+  IN,
+  OFF
+} x;
+
+x=IN if (x==OFF) {...}
+// just some large var i think?
+
+// insert debugging statuemnts;
+// conditional compilation
+#define DEBUG 1
+i=f(j);
+#if DEBUG
+printf(“f:in %d out %d\n”,i,j);
+#endif
+
+//gdb print varible, x contents of address, backtrace tells gdb to lit all function calls that lead to crash in stack frame. 
+// common crashes: unaligned memory access (access to more than one byte must be aligned at a particular size); depends on cpu
+// using unitinalized pointers, bounds on array
+//good modular design, clear logic, assigning responsiblity
+//when program dumps core, it creates a dump file called core. file is an image of mmeory, registers including stack and data at time of crash.
+// also use #unclde <errno.h>
+#include <stdio.h>
+#include <errno.h>
+#include <math.h>
+#define POSITIVE 25
+#define NEGATIVE -25
+int main() {
+double ret;
+errno = 0;
+ret = sqrt(NEGATIVE);
+if (errno == EDOM) /*EDOM
+Signifies Domain Error*/
+printf("Domain Error : Invalid Input
+To Function\n");
+else
+printf("Valid Input To Function\n");
+errno = 0;
+ret = sqrt(POSITIVE);
+if (errno == EDOM)
+printf("Domain Error : Invalid Input
+To Function\n");
+else
+printf("Valid Input To Function\n");
+return 0;
+}
+
+#include <stdio.h>
+ #include <errno.h>
+ #include <math.h>
+ void test(double value) {
+ double ret;
+ errno = 0;
+ ret = sqrt(value);
+ if ( errno )
+ {
+ perror("sqrt");
+ }
+  else
+ {
+ printf("ret = %g\n", ret);
+ }
+ }
+ int main() {
+ test(-25);
+ test(25);
+} 
+
+ //int fseek -> fet file position indicator for the stream pointed to by stream, if error, error indicators stream shall be set and fseek fails. the new position, measured in btes,
+// #include <stdlib.h> int rand() returns random numner. 
+// srand(num) seeds random number generator. if want truly random have to read from /dev/random or /dev/urandom
+
+FILE *fp1;
+int c;
+fp1=fopen(“/dev/urandom”,”r”);
+c=getc(fp1);
+printf(“%d\n”, (int)c);
+fclose(fp1); 
+
+// could use time_t time(time) with srand ie: srand((unsigned int) time(NULL)); from time.h
+
+
+
+
 
 
 
