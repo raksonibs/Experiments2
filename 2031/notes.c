@@ -444,12 +444,224 @@ fclose(fp1);
 
 // could use time_t time(time) with srand ie: srand((unsigned int) time(NULL)); from time.h
 
+//os does file management, scheduling, memory management, i/o management
+// includs kernel, system programs, shell
+// each prog has a process with its own PID
 
 
+// # Set the initial value.
+// myvar=abc
+// echo "Test 1 ======"
+// echo $myvar # abc
+// echo ${myvar} # same as above, abc
+// echo {$myvar} # {abc}
+// $ sh var_refs
+// Test 1 ======
+// abc
+// abc
+// {abc}
+// echo "Test 2 ======"
+// echo myvar # Just the text myvar
+// echo "myvar" # Just the text myvar
+// echo "$myvar" # abc
+// echo ‘$myvar’
+// echo "\$myvar" # $myvar
+// Test 2 ======
+// myvar
+// myvar
+// Abc
+// $myvar
+// $myvar
+// echo "Test 3 ======"
+// echo $myvardef # Empty line
+// echo ${myvar}def # abcdef
+// Test 3 ======
+// abcdef
 
+// $? - exit status 
+// $$ - process id 
+// $* string containg list of arguments
+// $# number of arumgnet 
+// $0 command line 
 
+// • ${name-word} - value of name if it exists,otherwise word
+// ${name+word} - “word” if name exists, blankotherwise
+// • ${name=word} - if name does not exist, sets variable name to word, substitutes value of name
+// • ${name?word} - if name does not exist then prints an error (“word”) then exits shell - otherwise substitutes value of name
+// read is built in command with an exit status of 0, on failre or eof.
+// read input default spearates words by spaces and tab charaters. can change separator by setting IFS: // ex: IFS=:
+// z=`expr $z +1`
+// bash alllos artheitc interger operatios via let or $(())
+N=`echo “scale=3; 13 / 2” |bc`
+echo $N
 
+// set command resets position arguments. ex set apple banana cherry and echo $1, $2, $3
+// test comman or [ $1 != Tom ] echo $? -u is suid bit. -L symboli link, -s is nonzero size.; bash extended operators allows for & and ||
+// • [ $var = rightvalue ] && echo OK bad practce because text syntax error when var is blank
+//[ "X$var" = "Xrightvalue" ] && echo OK // X infront protexts against unusual variable values
+//• [ -d $dir ] || mkdir $dir -> create directory if does not exist
+//
 
+if [ $marks –ge 80 ]; then
+grade=A
+elif [ $marks –ge 70 ]; then
+grade=B
+elif [ $marks –ge 60 ]; then
+grade=C
+else
+grade=D
+fi
+echo $grade
+
+myprogram < data.in > result.out
+if [ -s result.out ]; then
+echo "Output generated !!"
+else
+echo "empty output!!"
+fi
+
+for SCRIPT in /path/to/scripts/dir/
+do
+if [ -f $SCRIPT -a -x $SCRIPT ]
+then
+$SCRIPT
+fi
+done
+
+// -eq does compairson for value equal, and not =
+$cd testdir 2>/dev/null && rm *.dat  // run second only if first succeeds
+set –e // exits first time encounters and error
+command1 || command2
+
+for user in `cut -d: -f1 < /etc/passwd`
+do
+echo –n "$user:"
+finger $user
+done
+
+while read line
+do
+echo line: $line
+done <file
+
+(while read line; do; echo line:$line;
+done) <file
+// each case must end in ;;
+case $# in
+0) set `date`; m=$2; y=$6;;
+1) m=$1; set `date`; y=$6;;
+2) m=$1; y=$2;;
+esac
+case $m in
+jan*|Jan*) m=1;;
+feb*|Feb*) m=2;;
+mar*|Mar*) m=3;;
+apr*|Apr*) m=4;;
+may*|May*) m=5;;
+jun*|Jun*) m=6;;
+jul*|Jul*) m=7;;
+aug*|Aug*) m=8;;
+sep*|Sep*) m=9;;
+oct*|Oct*) m=10;;
+nov*|Nov*) m=11;;
+dec*|Dec*) m=12;;
+[1-9]|10|11|12) ;;
+*) y=$m;m="";;
+esac
+/usr/bin/cal $m $y
+
+// shift moves all arguments down 1
+// so $2 bwcomws $1 and $1 gets throgwn away
+while [ $# -gt 0 ]; do
+echo "processing arg:  $1"
+shift
+done
+
+// can write functions name() {...}
+allfiles() {
+// # true if all args are files
+for x in $*; do
+if [ ! -f $x ]; then
+return 1
+fi
+done
+return 0
+}
+
+// .. no local variables in shell but can be if set local x="hello"
+x= # set x to blank
+f1() {
+x=“hello”
+}
+f1 ; echo $x # call f1()
+
+n[iea]ce
+^day 
+day$
+[^abc] // char not in abc
+ab{3,5}c
+// ab{1,}c matches at least one occurence of b
+//? is optional in reg exp. zero or one.
+// \<[tT]he\> matches words as well
+a(xyz)*
+a(xy){2,3}
+// tr ab cd replaces every occuence of a by c and by by d
+// xargs commands execute the given command for ach word in stdin
+// • find . –type f –name “*.c” –print |xargs wc
+// `back quotes are shell commands and double quotes are like single quote except the varaible subsimtiona nd back quotes are treated as special characters
+//
+#!/usr/bin/env bash
+# cookbook filename: trackmatch
+#
+for CDTRACK in *
+do
+if [[ "$CDTRACK" =~ "([[:alpha:][:blank:]]*)- ([[:digit:]]*) - (.*)$" ]]
+then
+echo Track ${BASH_REMATCH[2]} is ${BASH_REMATCH[3]}
+mv "$CDTRACK" "Track${BASH_REMATCH[2]}"
+fi
+done
+
+sed 's/day/night'
+sed 's/[0-9]*/& &/' //doubles a number at the beginning of a line
+
+– sed -e 's/a/A/g' \
+-e 's/e/E/g' \
+-e 's/i/I/g' \
+-e 's/o/O/g' \
+-e 's/u/U/g' <old >new
+
+– sed -f sedscript <old >new // if have large number of sed commands 
+ # sed comment - This script changes lower case
+vowels to upper case
+s/a/A/g
+s/e/E/g
+s/i/I/g
+s/o/O/g
+s/u/U/g
+
+// every line of input read into pattern space. after all lines read through pattern space, line is sent to piutput,.
+//-n suppresses the automatic printing of pattern space. -e script to follow. -f script file
+///^S/d delet all blank lines. 7d delete seventh line
+// /a append /c change current line with new text.h/ copy pattern space. p print line, s is to susbtitue.
+// sed –n ‘s/west/north/p’ print only line that contains the word after replacing it by north
+// sed –n ‘s/west/north/gp’ print only line that contains the word after replacing it by north but replace every occurrence (g for globally)
+// sed ‘/James/r newfile’ file Looks for lines that contains James and right after it, sed read and includes the contents of “newfile”
+// • sed –n ‘/north/ a\ <---Moved------->’ file It will append the string “<---Moved--->” after each line that contains “north
+// sed ‘1,3y/abcdef/ABCDEF/’ datafile Capitalize letters a-f in// the first three lines
+// awk consists of inscturcions and action.
+// actions are separate my semiconl
+// awk NR is record number while NF is the number of fields in a record
+//
+
+BEGIN { print "Beginning of file";
+print "-----------------" ;
+}
+// # Print every line in the file.
+END { print "------------"; print "End of file."}
+
+//• awk ‘$3 ~ /Bill/{print $3}’ file
+// date | awk ‘{print “Month: “ $2 “\nYear: “ $6}’ // columnar data
 
 
 
