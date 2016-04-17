@@ -409,7 +409,78 @@ f2c:
   mul.s $f0, $f16, $f18 # $f0 = (5/9)*(fahr – 32.0)
   jr ra
  
-   
+
+- for every instruction first two steps are identical: send the program counter to memory that contains the code and fetch the instrucion from that memory 
+- read one or two registers, using fields of the instructions to select the regersts to read. for the load word instructon, we need only one reigster, but for most we need two 
+-then depends on function class 
+- all instruction calsses except jump use the arhtmetic logic unit after reading reigsters. the memory refernece use ALU for an address calcultion, the arhtmetic logical instructions for the operation exectuion, andbranches for comparison.
+- after ALU, differ on various instruction classes. 
+- memory regerence intrsuction will need to access memory either to read data for a laord or write data to store. 
+- an arthmetic logical or load instruction must write the data fro the ALU or memory back into regsiter. for bracnch instruction, may need to change next instruction address based on comparison, otehrisw PC should be incremented by 4 to get the address 
+- cannot make data lines simply wired together, but instead must add a logic emelemnt that choeses among the multiple sources and steers one of those sources to its destination. done through a mulltierxer, which is more apt a data selector. 
+- multiplexor selects from seveal inputs based on setting its control lines 
+-several units also are controlled based on type of instruction. 
+-all porgrams start in program counter to supply instruction address to instruction memory 
+- after the isntruction is fetched, register operands used by instruction are specified by fields of that isntruction
+- once the register operands have been fetched,they can be operated on to compute a memory address or arhtmetic result or compare result. if athetmic, alu must write to register. if operation ld, alu result is used as an address to either store a value or load a value from memory into registers
+- the result from alu or memory is written back into resigter file. branches require use of alu ouput to determine the next instruction address, which comes from either the alu or from an adder which increments the current PC by 4. 
+- data types elements consist of two different types of logic elements, those that operate on data values and elements that contain the state. elements that operate on data values are cominational. given same input, always output same output 
+- ALU has no internal storage so always the same output 
+- element contatins state elements like instruction and data memores as well as registers are state elements 
+- state element has at least two inputs and one output. reuqired inputs are the data value to be writtein into the elment and the clock, which determins when the data value is written 
+-one of simplest state elements is a Dtype flipflop, which has a value and a clock 
+- the clock is used to determine when the state element should be written, a state element can be read at any time 
+- logic componenets contain state are called sequenetial because outputs depend on both their inputs and the contents of the internal state .
+-for example output of functional uint reprenseting registers depends both on the register numbers supplied and on what was written to registers previosuly 
+- clocking methodology defines when signals can be read and when can be written 
+-edgetriggered clocking methodology in which all state changes offur ona  clock edge (a quick transition from low to high or vice versa). inputs written in previous clock clycly,e and outputs in following clock cycle 
+-control signal is a singal formultplexor sleection or for directing the operation of a functional unit, contrasts with a data signal which continas information that is operated o by a functional unit. 
+- asserted is a logical high or true and dessarted is oposite. 
+- both clock singal and write control signal are inputs, and the state element is chaned only when the write control signal is asserted and a clock edge occurs 
+-an edgetrigged methodlogy alllows to read contents of a register, sned value through some cominbintaonal logic, and write that register in same clock cycle. 
+- for mips 32, nearly all of these state and logic elements have inputs and ouuts 32 bits wide. figures wil indiciate buses which are singals wider than 1 bit. 
+- we need first a memory unit to store instructions of a program and supply instrcutions to given address. program counter is the reigste rholding the address of current instruction, and need adder so that can increment PC to addresss of next insturction, the adder which is combintational can be built from the ALU simply by wiring control ines so the control always specifies an add operation 
+- first fetch instruction from memory, increment counter to next intrsution 4 bytes later. 
+- the r format instructions read two registers, perfrom an ALU operation on the contents of registers and wrte the result to a register, either R type instructions or athemticalogica operations. 
+- the processers 32 general purpose registers care stored in register file which is a collection of registers inw hcih any register can be read or written by specifying the number of registe rin file . 
+-r format instructions have three register oprands, two data words from reigser and write one data word into register file for each isntruction 
+- for each data word to be read from registers, need an input to register file that specifics the register number to be read and an output register.
+-the register file always outputs contents of whatever register numbers are on the read reigster inputs, write however are ontrolled by the write control signal, which must be asserted for a write to occur at clock edge 
+- need a total of four inuts then with three reigster numbers and one for data and two outputs, both for data 
+- register number inputs are 5 bits wide to specifiy of 32 registers whereas the data input and two data output buses are each 32 bits wide 
+-- inputs carrying register number are 5 bytes wide but lines arraying data are 32 bits wide.  operation to be perfromed by ALU is controleld with ALU operation signal, whcih is 4 bits wide. 
+- considerI type, these instructions compute a memory adress by adding base reigster to 16bit signed offset field continaed in the instruction 
+- if instruction is a store, the value to be stored must also be read from the register file where it resies. if insturction is a load, the value read from memory bust be written into the register file in the specified register 
+- need a unit to sign extend the 16 bit offset field in sintruction to a 32 bit offset field, and a data memory unti to read from or write from.
+-data memory has read and write control signals, an address input, and an input for the data to be written into memory 
+-beq has three operands, two regerds that are compare,d and 16bit offset used to compute branch target address. 
+- must compute the branch target address by adding the sign extend (to increase the size of a data tiem by replicating the high order sign bit of the original data tiem in the high order bits of the larger, destination data item) of the instruction to the PC:
+  1) instruction set archtiture speciifs that the base for the branch address calculation is the address of the isntruction, since we compute PC + 4, easy value as base for computing branch target address
+  2) also states offset field is shifted left 2 bits so it is a word ofset, increases the effective range of the offset by a factor of 4 . thus will need to shift the offset field by 2
+- when condition is tue, the branch target addres become sthe new PC and bracnh is taken, if not equal, the incremented PC should replace currenct PC.
+- thus branch datapath must do two operations: compute the branch target address and compare registers. 
+- needs the data memory unit is  a state element with inputs for adress and write data, and a single output for read result. separate read and write cotnrols, although only one may be asserted on any given clock. memory unit needs a read singla. sign extenton has a 16 bit input that is sing extened into a 32 bit result appearing on the oput. data memory is edge triggerd for writes. 
+- the alu provdes an output signal indicates where result is zero, can send two register operands to ALU with control set to do a subtract. If zero signal is asserted, know they are equal .
+-jump insturction oeprates by replacing the lower 28 bits of the PC with the lower 26 bits of instruction shopfted by 2 bits. Simply adding 00 to jump offset accomplishes this
+-delayed branches when true, a delayed branch first executes the instruction immediately following the branch in sequential instruction order before jumping to the specified branch target address 
+- differences between r time arhtmetic logical and memory instructions are arthemtic lgoical use the ALU ith inputs coming from the two reigstes. memory instruction also use ALU for address calcaultion, although second input is the sign extend 16 bit offset 
+- value stored into a destination fromes from ALU for an r type or memory for a load. 
+-to create datapath with only a single register file and single ALU, must support two different sources for the second ALU input, as well as two different sources for that data stored into the register file. thus one multiplexor is placed at the ALU input and nother at the data input to the register file 
+- can create for datpath for instruction fetch, the data path for r type and memory instructions, and datapabth for branches 
+- mips alu defines 6 combinations of four control inputs: and, or, add, sutract, set on less than, nor 
+- for load word and store word we use the alu to compute the memory address by addition 
+- for rtype alu performs first five, depdning on value of 6 bit function field in low order of bits. for branch equal, alu must perform a subtraction 
+-can generate 4bit control input using small contril unit as inputs the function field of instruction and a 2 bit control field, called aluop
+- ALUop indicates whether the operation to be performed should be add (00) for load and stroes, subtract (01) for bew, or detemined by operation (10) in funct field 
+- output of ALU control unit is a 4bit signal that directlty controls the ALU be generating one of the 4 bit combintaitons 
+- main control unit generates the ALUop bits, which are then used as input to ALU control that generates signals to control ALU. using multiple levels of control decreases file size and increases speed. 
+- set control signals baed solely on the opcode field of instruction. PSCr is an exception and should be asserted if instruction is branch on equal and the zero output of the ALU which is used for equality comparison.
+memtoreg -> register write data 
+memwrite -> write data input 
+memread -> data memory contnets designed by address are on read data output 
+aluop -> aly controlalusrc -> goes to multipxpler 
+pscrc - 
+
 
 
 
