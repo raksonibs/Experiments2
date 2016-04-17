@@ -237,6 +237,182 @@ sum:
 sum_exit:
   add v0, a1, zero  #return value of acc 
   jr ra @return to caller
+
+
+
+  addition and subtraction pretty easy on binary.
+  - overflow occurs when result from operation cannot be resperenset with available harare, in cae of 32 bit additon. when adding operainds with diff signs, ofervlow cannot occur.
+  -when subtract overflow can't occur when signs are the same as always smaller 
+  -lack of 33rd bit means when overflow occurs, sign bit is set with value instead of proper sign of result 
+  -a carry out would have occured into the sign bit
+  - we must then have a way to ignore overflow, where add unisigned ingore overflow 
+  -mips determine overflow with an excpetion, also called an interrupt. an interurpot is an unschedulred procudre call. addres of isntruction that overlfow is svaed in a register and computer jumpts to a predfeined address to invoke the appropaite routine
+  -mips only has integer arhtemitc ops on full words 
+  -can have mips to detect overlfow
+  addu t0, t1, t2 
+  nor t3, t1, zero 
+  sltu t3, t3, t2 
+  bne t3, zero, Overflow 
+
+  multiplcand has long process  shift left, and a bunch of other stuf, refer to paper notes.
+  ex: multiplty 0010 by 0011 
+  0
+Initial values
+ 0011
+0000 0010
+0000 0000
+1
+1a: 1 ⇒ Prod = Prod + Mcand
+0011
+0000 0010
+0000 0010
+2: Shift left Multiplicand
+0011
+0000 0100
+0000 0010
+3: Shift right Multiplier
+ 0001
+0000 0100
+0000 0010
+2
+1a: 1 ⇒ Prod = Prod + Mcand
+0001
+0000 0100
+0000 0110
+2: Shift left Multiplicand
+0001
+0000 1000
+0000 0110
+3: Shift right Multiplier
+ 0000
+0000 1000
+0000 0110
+3
+1: 0 ⇒ No operation
+0000
+0000 1000
+0000 0110
+2: Shift left Multiplicand
+0000
+0001 0000
+0000 0110
+3: Shift right Multiplier
+ 0000
+0001 0000
+0000 0110
+4
+1: 0 ⇒ No operation
+0000
+0001 0000
+0000 0110
+2: Shift left Multiplicand
+0000
+0010 0000
+0000 0110
+3: Shift right Multiplier
+0000
+0010 0000
+0000 0110
+
+-
+
+store multipler and muplicatnd and product.
+if multipler least signifat is 1, then add prod + mulciandt. then shift left mulcand and shift right multipler 
+if multipleiter is zero, just shift left multicand, and shift right multipler 
+- to multiply signed numbers, just remember the sign, and then just change to negative after 
+-faster multiplcations are possible by essentialy adding one 32 bit adder for each bit of multiper,
+rather than using a single 32 bit adder 31 times, user 31 adders and organize to minimize delay.
+- mips uses separate pair of 32 bit registers to cotina the 64 bit production called hi and lo. to fetch integer 32 bit product, uses mflo (move from lo). 
+- no overflow in multipcation mips, so upt to software. if no overflow if Hi is 0 for multu or replicated sign of Lo for mult 
+- divdend = quotient * divisor + remainder 
+- divide 7 by 2:
+1. subtract divior from remiander resgiter and  lace in raminder register. 
+if remiander negative, restore original value by adding the divisor register to raminder register nad placing sum in the remainder register. also shift the quotient register to the left, settingthe new least significnat bit to 0.
+if remainder greater or zero, shift quortient register left, setting new rightmost bit to 1.
+- shift divisor register right 1 bit.
+- no 33rd repsietions then done
+- divisor into alu into remainder with control test
+-negate the quotietn if signs disagree
+-signed division must also set sign of reminader. make sure adds up toegher.
+- be able to speed up division by throwing hardware add it, but can't do same trick for division. Reason is that we need to know sign of difference before can perform next step of alogrhtim, but we could do 32 partial products
+-srt division is an example iwth a lookup table of various upper bits of reminader and dividedn
+-divu/div in mips assign Hi with the reamidner and Lo contains the quotient. the mips assembler allos divide instructions to speficity three gereits, generating mflo and mfhi instrcutions to place the desired reuslt into a general purpose register
+- can show scentigic notation in binary.  need a new dciaml point which is a binary decimal point 
+-floating point because binary point is nto fixed.
+- standard scientific notation for reals offers simply echange of data that includes floating point, simiplies algothirms, and increased accuracy of word because unnecessary leading 0s are replaced by real digits to right of binary point 
+-must compromise between size of fraction and size of exponenet 
+- (-1)S * F ( 2E where f is the fraction field at 23 bits and E is the exponent field, at 8 bits. 
+  -Fractions as small as 2*10-38 are represened, and as large as 2.0 * 10^38). over flow still possible because exponenet is too large to be repsreneted 
+- new king of excpeitona event because can be too small, which is underflow . the negative expontnent is too large to fit the exponnent field 
+- one way to remove underflow or overflow is to offer another format that has a larger exponent, called double in C, which is double precision.. exponent becomes 11 bits, with faction being then 20 + another 32 bits with a 52 bit number. 
+- biased notation, with bias being number subtracted from the normal, unsigned representation to determine the real value. bias of 127 for single perceiton so an expoent of -1 is represented by bit pattern of -1 + 127 and 1 is +127/ The exponenet for double percesion is 1023. 
+
+ex: -0.75 in single and double perceison 
+= -3/4 or -3/2^2
+-11/2^2 in binary fraction 
+-0.11 * 2^0 in scntific notation.
+in normalized scientifc notation 01.1 * 2^-1 
+for single percesion: (-1)^s * (1+ Fraction) * 2^(Exponent-127)
+( 1)1   (1   .1000 0000 0000 0000 0000 000)  * 2&(126-127)
+becomes 1011111101(and 22 zeros) and double point becomes same but with way more zeros.
+- going other way, sign bit is 1, exponent fields contains 129, and frction field cointains 1 * 2^-2 or 0.25.
+(-1)^s * (1 + fraction) * 2^(Exponent - Bias) = (-1)^1 *(1+0.25) *  2^(129-127) = -5.0
+
+- to perfrom floating point properly align the point of number that has smallest exponent. 
+- so shift the signifcand of the smaller number to the right until its corrected exponent mathes the larger number
+- then comes addition of significands 
+- the sum needs to be normalized
+ex: ading 0.5 and -0.4375
+
+0.5 = 1/2 = 1/2^1 = 0.1basetwo = 0.1basetwo * 2^0 = 1.000 * 2^-1
+-0.4375 = -7/16 = -7/2^4 = - 0.0111 = -0.111 * 2^0 = -1.110 * 2^-2
+- now the signifcand of number with lesser exponent, 2^-2, is shifted right until mathes larger number, therefore now -0.111 * 2^-1
+- add the significands 1.000 * 2^-1 + (-0.111 * 2^-1) = 0.001 * 2^-1
+- normalize it = 1.000 * 2^-4
+
+- multiplcation: add exponenet of operands togheter, cannot add the biases as well, therefore subtract bias number of 127
+- multiply out the singicands normally 
+- normaliz the product. 
+ex: 0.5 * -0.4375
+ 1.000two   2 1 by  1.110two   2 2
+ -1 + -2 = -3 
+ multiply signfancds ugly: 
+ 1.000two   1.110two
+0000 1000
+1000 1000
+1110000two
+, keep four digits so 1.110 * 2*03 
+-since sign differs make the sign of the product negative. 
+Floating-point addition, single (add.s) and addition, double (add.d)
+■ Floating-point subtraction, single (sub.s) and subtraction, double (sub.d)
+■ Floating-point multiplication, single (mul.s) and multiplication, double (mul.d)
+■ Floating-point division, single (div.s) and division, double (div.d)
+■ Floating-point comparison, single (c.x.s) and comparison, double (c.x.d), where x may be equal (eq), not equal (neq), less than (lt), less than or equal (le), greater than (gt), or greater than or equal (ge)
+■ Floating-point branch, true (bc1t) and branch, false (bc1f)
+-Mips designers user separtae floating pointe registers, included separate loads and stores for floating point numbers, lwcl and swc1. 
+ lwc1      $f4,c($sp)  # Load 32-bit F.P. number into F4
+    lwc1      $f6,a($sp)  # Load 32-bit F.P. number into F6
+    add.s     $f2,$f4,$f6 # F2 = F4 + F6 single precision
+    swc1      $f2,b($sp)  # Store 32-bit F.P. number from F2
+-
+float f2c (float fahr)
+                {
+                       return ((5.0/9.0) *(fahr – 32.0));
+}
+
+f2c:
+  lwc1 $f16,const5($gp) # $f16 = 5.0 (5.0 in memory)
+  lwc1 $f18,const9($gp) # $f18 = 9.0 (9.0 in memory)
+  div.s $f16, $f16, $f18 # $f16 = 5.0 / 9.0
+  lwc1 $f18, const32($gp)# $f18 = 32.0
+  sub.s $f18, $f12, $f18 # $f18 = fahr – 32.0 Note: fahr was passed in f12.
+  mul.s $f0, $f16, $f18 # $f0 = (5/9)*(fahr – 32.0)
+  jr ra
+ 
+   
+
+
+
     
 
 
