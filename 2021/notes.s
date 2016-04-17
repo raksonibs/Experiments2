@@ -480,12 +480,95 @@ memwrite -> write data input
 memread -> data memory contnets designed by address are on read data output 
 aluop -> aly controlalusrc -> goes to multipxpler 
 pscrc - 
+regdest -> goes to multiplexer before registers 
+regwrite - goes to registers 
+- input to control unit is the 6bit opcode field from the instruction
+-the outputs of control unit conist of three 1 bit signals that are used to control mulplxiers (regdest, alusrc, memtoreg), three signals for controlling reads and writes in register file and data memory(regwrite, memread, memewrite), and 1 bit signal used to determine where branch (branch), and a 2 bit control signal for the ALU (aluop). an and gate is used to branch and Sero output from ALU, the and controls selection of next PC. 
+1.instruction is fetched and PC incremented,
+2. registers are read from register file, also main control unit computes the setting of control lines during this step
+3. the ALU operates on the data read from the register file, using the function code (bits 5:0 funt field) to generate ALU function 
+4. the result from the ALU is written into the register file using 15:11 of the instruction to select destination register 
+# for add t1, t2, t3 
+#for lw t1, offset(t2)
+1. an instruction is fetched from memeory, and PC is incremented 
+2. A register t2 value is read from the register file 
+3. the ALU computesthe sum of the value read from register file and the signextended, lower 16 bits of the instruction (offset)
+4. the sum from the ALU is used as the address for the data memory 
+5. The data from the memory unit is written into the register file, the register destination is given by bits 20:16
+#beq t1, t2, offset
+1; An instruction is fetched from instruction memory, and PC is incremented
+2. two registers t1 and t2 are read from register file 
+3. the ALU performs a subtract on data values. THe PC + 4 is added to sign extend, lower 16 bits of the instruction offset shifted left by two to get branch target address
+4. The zero result from the ALU is used to decide which adder result to store into the PC 
+- setting of cntrol lines is completelt determing by opcode fields of instruction
+- outputs are control lines, input is the 6bit opcode filed OP[5:0]
+jump instruction computes targe PC and not coditional.
+  - low order bits always 00. next twenty 26 bits are the immediatel field instruction, upper 4 bits are address should replace te PC + 4 
+  - upper for 
+  - load the longest thus single cycle design not proper (uses five: insturction memory, register file, ALU, data memory, and register file)
+- piplinging is multiple instructions are overlapped in execution 
+- hence pipling would ot decrease the time to complete one task, but when many tasks, the improvement in throughput decreases the total time to complete all tasks 
+-classic five steps:
+  1. fetched instruction from memory 
+  2. read registers while decoding the instruction 
+  3. execute operation or calcuate an address  
+  4. access an operand in daata memory 
+  5. write result into a register 
 
+- time between instructionspiplined = timebetweeninstructionnonpipeleing / number of pipe stages 
+-pipeline stage times lmited by slwest resocce, either the alu operation or meory access 
+-pipinling increases intrusction throughput as opposed to decreaesing the execution time of an individual instruction 
+- in mips all isnturctions are same length, restirction makes easy to fetch 
+-  only has a few insturction formats, with soruce register fiels being located in same place in each instruction. thus symmetifc and can read gister at smae time derteming what type of instruction was fetched
+- third memory operands only appear in loads or stores. can excute stage to calculate memory address and then access in following stage 
+- fourth is operands must be algined in memory 
+- three types of hazards when next instruction cannot execute in following clock cycle:
+  1. structural hazard: when a planned isntruction did not excute because hardware does not support the combination of instructions that are set to execute 
+  2. data hazard (pipeline data hazard): data that is needed to execture the instruction is not yet avaialble. don't need to wait though. as soon as ALU creates, we can supply as input for next operation. adding extra hardware to retreive the missing item early from intenral resoruces is called forwarding or bypassing. 
+    - load use data hazard in which being loaded by a load instruction has not yet become availabe when it is needed by another isntruction . a pipeline stall but also a bubble:.
+    a = b + e;
+    c = b + e#assume all in memory
+    lw t1, 0(t0)
+    lw t2, 4(t0)
+    lw t4, 8(t0)
+    add t3, t1, t2 
+    sw t3, 12(t0)
+    add t5, t1, t4 
+    sw t5, 16(t0)
+    - control hazards arise from need to make decisin based on resuults of one intrscution (branch harazed) while others are exectuing 
+    - computers use prediction to handle branches. always predict that branches will be untaken. can have some taken and untaken. 
+    - dnyanic hardware predcitors make guesses based on behavior of each branch. can hae delayed decsicon as well, delayed branch alwaus excutes the next sequential instruction, with branch taking place after that one instruction delay. it is hidden rom mip. 
+    - pipelingin explorts parallelism among instructins in sequential isnturctin stream, it is invisible. 
+    - 
 
+    if: instruction fetch 
+    id: instruction decode and register file read 
+    ex: execution or address calculation 
+    mem: data memory access
+    wb: write back 
 
+    tow excpetion to left to right flow: the write back stage, which places result back into register file , or selection of next value of PC chosing between incremented PC and the branch address from the MEM stage 
+    - right to left lead to data hazards (not really strucual) and second lead to control hazards 
+    - 
+- highight rgiht half of registers when being read and left half when written 
+- instruction fetch, read from memory using address in PC and then placed in IF/ID pipplein reigster. PC address is incremented by 4 and written back into PC to be ready of rnext clock cycle. This incremented address is also saved in the IF/ID pipeline register in case needed later for beq..
+- intrusction decfoe and filte resgister read: if/id pipeline register suplyies the 16 bit immediate field, which is  sign extened to 32 bits, and the register numbers to read the two registers. all three values are stored in the ID/ex pipeline register, along with incremented PC address. 
+execute o raddress caclulation: load instruction reads contents of register 1 and signextended immediate from the ID/EX pipeline register and adds them to ALU. the sum is placed in the EX/MEM pipeline register 
+- memory access: load instruction reading the data memory using the address from the EX/MEM pipeline register and loading the data into the MEM/WB pieplien register
+- read data from MEM/WB pipieline register and write to register file 
 
-    
+for store:
+instruction fetch: read from mmory using address in PC and placed in IF/ID pipleing 
+- the instructin in IF/ID pipeline register supplies the register numbers for reading two registers and extends the siggn of the 16bit immediate. These three 32 bit values stores in the ID/EX pipeline register. 
+Execute: the effective address placed in the EX/MEM pipeline 
+Memory: Register containg the data to be stored was readed and stored in ID/EX. Only way to make data avaialbe during MEM stage is to place data into EX/MEM pipeline register in the EX stage.
+write back: nothing hapens since every instruction behind the store is already in progress. 
 
+- add control to pipelined datapath.
+1.intrsuction fetch: control signals to read instruction memory and to write the PC are always asserted, nothing tocntrol.
+2. Instruction decode: same thing happens everytime 
+3. Execution: signals to be set are RegDst, ALUOp, and ALUSrc. SIgnals select the result regiseter and the ALU operation, and either read data 2 or a sign exteneded immediate for the ALU 
+4. memory access: control lintes set in this stage are branch, memread, and memwrite. the branch equal, load, and store instructions set these signals. PCsrc selectes next sequential address unless control asserts Branch and the ALU result was 0.
+5. Write back: control lines MemToReg which decides between sending the ALU result or memory value to register file, and RegWrite, which writes the chosen value 
 
-
-
+- although complier generally relies upon the hardware to resolve hazards and therby ensure correct execution, complier must undersand the pipeline to acheive the best perfromance otherwise unexpected stalls will reduce the perofrmance of compiled code. 
