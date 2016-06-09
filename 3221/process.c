@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 int main(int argc, char **argv) {
   // for each data set, make a child process
@@ -28,6 +29,8 @@ int main(int argc, char **argv) {
   float sum;
   float current;
 
+  char buffer[1024];
+
   char * readFile;
 
   for (int i = 0; i < argc; ++i) {
@@ -48,15 +51,15 @@ int main(int argc, char **argv) {
 
   if (pid < 0) {
     // error occured
-    fprintf(stderr, "%s\n", "ouch");
-    return 1;
+    perror("fork() error");
+    exit(-1);
   } else if (pid == 0) {
     // child processs
     printf("\n Hello I am the child process ");
     printf("\n My pid is %d \n",getpid());
     readFile = argv[internalCount];
     internalCount++;
-    printf("I am going to read %s\n\n\n", readFile);
+    printf("I am going to read %s\n", readFile);
     fp = fopen(readFile, "r");
      if(fp == NULL) 
      {
@@ -65,13 +68,10 @@ int main(int argc, char **argv) {
      }
      if( fgets (str, sizeof(str), fp)!=NULL ) 
      {
-        /* writing content to stdout */
-        // puts(str);
-
         pch = strtok (str," ,.-");
         while (pch != NULL)
         {
-          printf ("%s\n",pch);
+          // printf ("%s\n",pch);
           current = atof(pch);
           if (current > max) {
             max = current;
@@ -86,23 +86,21 @@ int main(int argc, char **argv) {
         diff = min - max;
         sum = min + max;
 
-        printf("Filename: %s, sum: %f, diff: %f, max: %f, min: %f\n", readFile, diff, sum, max, min);
-
      }
-     fclose(fp);
+      fclose(fp);
+      printf("*****END CHILD PROCESS *******\n");
+      snprintf(buffer, sizeof(buffer), "Filename: %s, sum: %f, diff: %f, max: %f, min: %f\n", readFile, diff, sum, max, min);
+      // printf("Filename: %s, sum: %f, diff: %f, max: %f, min: %f\n", readFile, diff, sum, max, min);
+      execl("/bin/echo", "echo", buffer, NULL);
     // execlp("/bin/ls", "ls", NULL);
-     printf("*****END CHILD PROCESS *******\n\n\n\n\n\n\n\n\n");
   } else {
     // parent will wait for child to complete
     wait(NULL);
-    printf("YOOWHOOO Child complete\n\n\n");
+    printf("YOOWHOOO Child complete\n");
     printf("\n Hello I am the parent process ");
     printf("\n My actual pid is %d \n ",getpid());
+    printf("Total stuff here \n");
   }
-
-  printf("All Child complete\n");
-  printf("Now total calc\n");
-  
 
   return 0;
 }
