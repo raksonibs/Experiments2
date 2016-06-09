@@ -4,21 +4,10 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 
-// static void createChild(int pid, const char *fileName) {
-//   pid_t childPid = fork();
-//   if (childPid < 0) {
-//     fprintf(stderr, "%.5d: failed to fork (%d: %s)\n", (int)getpid(), errno, strerror(errno));
-//      exit(1);
-//   } else if (pid > 0) {
-//     return;
-//   } else {
-//     exit(0);
-//   }
-// }
-
-float totalMax = 0;
-float totalMin = 100000;
+static float * totalMax = 0;
+static float * totalMin;
 
 int main(int argc, char **argv) {
   // for each data set, make a child process
@@ -29,6 +18,11 @@ int main(int argc, char **argv) {
   // may strucutre as waiting for all child process to finish then processing their data, or waiting for any child to finish and process its data.
 
   // pid_t pid;
+  totalMax = mmap(NULL, sizeof *totalMax, PROT_READ | PROT_WRITE, 
+                    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  totalMin = mmap(NULL, sizeof *totalMin, PROT_READ | PROT_WRITE, 
+                    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  * totalMin = 1000000;
   char * arr[200];
   char * pch;
   char str[5000];
@@ -117,14 +111,14 @@ int main(int argc, char **argv) {
         diff = min - max;
         sum = min + max;
 
-        if (max > totalMax) {
+        if (max > *totalMax) {
               // printf("Changing total Max: %f\n to %f\n", max, totalMax);
-          totalMax = max;
+          *totalMax = max;
               // printf("Changed total Max: %f\n\n", totalMax);
         }
-        if (min < totalMin) {
+        if (min < *totalMin) {
               // printf("Changing total Min: %f\n to %f\n", min, totalMin);
-          totalMin = min;
+          *totalMin = min;
               // printf("Changed total Min: %f\n\n", totalMin);
         }
 
@@ -148,7 +142,9 @@ int main(int argc, char **argv) {
   // wait for the more process to finish
   int status;
   waitpid(pid, &status, 0);
-  printf("MINIMUM=%f\tMAXIUMUM=%f", totalMin, totalMax);
+  printf("MINIMUM=%f\tMAXIUMUM=%f", *totalMin, *totalMax);
+  munmap(totalMax, sizeof *totalMax);
+  munmap(totalMin, sizeof *totalMin);
   // printf("Done!\n");
   return 0;
 }
