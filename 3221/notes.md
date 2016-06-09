@@ -152,3 +152,51 @@ struct mm_struct *mm; /* address space of this process */
 
 - mach system is message based. each task gets maiblboxes. 
 - communications in client server systems, sockets remote procedure calls, etc.
+
+- multithreaded server archeticture:
+  - client, request, server creates new thread to service the request, thread then has server resume listening for additonal client requests
+  - benefits: allow for conintued exction if part of process is blocked, especially important for user interfaces
+  - resource sharing: threads across resource shearing
+  -economy cheaper than process creation
+  - multicore programming: dividing activiteis, balance, data splitting, data depedency
+  - parallelism: implies can perofmr more than one taks ismilutatnously
+  - concurrency supports more than one task makig progress
+  - data parallelism: distrubtes subsets of same data across multiple cores, same operation
+  - task parallelism: distrubtuing threads across cores, each thread perfomance
+  - as # of threads grows, so does archeticural support for threading
+  concurrency vs parallism: multiple cores splitting tasks.
+  - amdahl's law: perfromance gains from addition additonal cores to an applicatttion that has both serial and parallel components
+  - serial portion of an application has disporotionate effect on perfomance gained  by additional additonal cores
+  - user threads management done by userlebel threads, or kernal threadas
+  - many to one multithreads, one to one, many to many
+  - two level allows user thread to be bound to kernel thread
+- p threads may be either user level or kernel level
+- implicit threading: creation and managemnt of threads done by compilers and runtime libraries rather tha nprogrammers
+- thread pools: create a nuber of threads in a pool where they awat work
+  - slightly faster to service a request with an exisitng thread rather than create a new thread
+  - allows number of threads in applcation to be bound to size of pool
+  - separating task to be performed from mchains of creating task
+- openMP set of compilter directives
+- runs loop in parallel
+
+- grand central dispatch:
+  - allow idnetification of parallel sections, details via threading,. blocks placed in dispatch queue.
+  - two types of dispatch queues:
+    - serial: blocks removed in FIFO order, queue is per process, called main queue
+    - concurrent: removed in fifo order but serval may be removed at time
+  - threading issues:
+    - semantics of fork and exec
+- signal handling
+  - signals used in unix to notify a process
+    - signal genreated with default or user defined handlers
+  - thread cancaellation
+    - thread to be canccled is target thread with two general approches: asynchyonous cancellation, defrerred cancelation
+  - invoking thread cancellation requests cancellation, but actual
+cancellation depends on thread state
+  - If thread has cancellation disabled, cancellation remains pending
+until thread enables it
+- canceleation only occurs when thread reaches 
+- thread local storage allows thread to have its copy of data  
+- both mm and two lebel models requires communication to maintain the approrpate number of kernel threads
+- tpyically use intermidate data strcutre between user and kernel threads a lightwear process
+- 

@@ -40,3 +40,19 @@ while (true) {
 
  /* consume the item in next consumed */
 }
+
+// pthreads joining threads
+#define NUM THREADS 10
+/* an array of threads to be joined upon */ pthread t workers[NUM THREADS];
+for (int i = 0; i < NUM THREADS; i++) pthread join(workers[i], NULL);
+
+
+
+  // open mp parallelism
+  #include <omp.h> #include <stdio.h>
+  int main(int argc, char *argv[]) {
+    #pragma omp parallel {
+    printf("parralel")
+    // parralel code
+  }
+  }

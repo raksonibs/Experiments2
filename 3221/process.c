@@ -17,6 +17,9 @@
 //   }
 // }
 
+float totalMax = 0;
+float totalMin = 100000;
+
 int main(int argc, char **argv) {
   // for each data set, make a child process
   // reads data set file names
@@ -40,15 +43,14 @@ int main(int argc, char **argv) {
   char * readFile;
   // int fd[2];
   // pipe(fd);
-  float totalMax = 0;
-  float totalMin = 100000;
 
   count = argc - 1;
   int internalCount = 1;
 
   // printf("Count is %d\n", count);
 
-  int fd[2];
+  // int fd[2];
+  int fd[2*count];
   pipe(fd); 
   int pid;
 
