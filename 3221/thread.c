@@ -7,11 +7,10 @@
 #include <sys/wait.h>
 #include <sys/mman.h>
 
-static float * totalMax = 0;
-static float * totalMin;
+float totalMax = 0;
+float totalMin = 100000;
 
 void *runner(void *param);
-int sum;
 // data shared on threads
 
 int main(int argc, char *argv[]) {
@@ -24,11 +23,39 @@ int main(int argc, char *argv[]) {
 
   // pid_t pid;
   // mmap is also useful for inter process communication. You can mmap a file as read / write in the processes that need to communicate and then use sychronization primitives in the mmap'd 
-  totalMax = mmap(NULL, sizeof *totalMax, PROT_READ | PROT_WRITE, 
-    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-  totalMin = mmap(NULL, sizeof *totalMin, PROT_READ | PROT_WRITE, 
-    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-  * totalMin = 1000000;
+  pthread_t tid;
+  pthread_attr_t attr;
+
+  // if (argc != 2) {
+  //   fprintf(stderr,"usage: a.out <integer value>\n");
+  //   return -1;
+  // }
+
+  // if (atoi(argv[1]) < 0) {
+  //   fprintf(stderr,"%d must be >= 0\n", atoi(argv[1]));
+  //   return -1;
+  // }
+
+  // get the default attributes
+  pthread_attr_init(&attr);
+  for (int i = 1; i < argc; ++i) {
+    // create thread
+    pthread_create(&tid, &attr, runner, argv[i]);
+
+  }
+  // wait for thread to exit
+  pthread_join(tid, NULL);
+
+  printf("TOTAL MAXIMUM = %f\t TOTAL MININMUM = %f\t", totalMax, totalMin);
+
+  // define NUM_THREADS 10
+  // pthread_t workers[NUM_THREADS]
+  // for (int i = 0; i < NUM_THREADS; i++) { pthread_join(workers[i], NULL); }
+  
+  return 0;
+}
+
+void *runner(void *param) {
   char * arr[200];
   char * pch;
   char str[5000];
@@ -42,46 +69,56 @@ int main(int argc, char *argv[]) {
   char buffer[1024];
   char * readFile;
   int val = 0, len, i;
-  count = argc - 1;
   int internalCount = 1;
   int fd[2*count];
-  pthread_t tid;
-  pthread_attr_t attr;
+  float sum;
 
-  if (argc != 2) {
-    fprintf(stderr,"usage: a.out <integer value>\n");
-    return -1;
+  readFile = param;
+  fp = fopen(readFile, "r");
+  if (fp == NULL) 
+  {
+    perror("Error opening file");
+    return(-1);
+  }
+  if( fgets (str, sizeof(str), fp) != NULL ) 
+  {
+    pch = strtok (str, " ");
+    while (pch != NULL)
+    {
+
+      current = atof(pch);
+
+      if (current > max) {
+        max = current;
+      }
+
+      if (current < min) {
+        min = current;
+      } 
+
+      pch = strtok (NULL, " ");
+    }
+
   }
 
-  if (atoi(argv[1]) < 0) {
-    fprintf(stderr,"%d must be >= 0\n",atoi(argv[1]));
-    return -1;
+  diff = min - max;
+  sum = min + max;
+
+  if (max > totalMax) {
+
+    totalMax = max;
+
   }
 
-  // get the default attributes
+  if (min < totalMin) {
 
-  pthread_attr_init(&attr);
-  // create thread
-  pthread_create(&tid, &attr, runner, argv[1]);
-  // wait for thread to exit
-  pthread_join(tid, NULL);
+    totalMin = min;
 
-  printf("Sum = %d\n", sum);
-
-  // define NUM_THREADS 10
-  // pthread_t workers[NUM_THREADS]
-  // for (int i = 0; i < NUM_THREADS; i++) { pthread_join(workers[i], NULL); }
-  
-  return 0;
-}
-
-void *runner(void *param) {
-  int i, upper = atoi(param);
-  sum = 0;
-  for (i = 1; i <= upper; i++) {
-    sum += i;
   }
 
+  fclose(fp);            
+  snprintf(buffer, sizeof(buffer), "Filename: %s, sum: %f, diff: %f, max: %f, min: %f", readFile, sum, diff, max, min);
+  printf("%s\n", buffer);
   pthread_exit(0);
 
 }
