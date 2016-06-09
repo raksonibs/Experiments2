@@ -18,10 +18,11 @@ int main(int argc, char **argv) {
   // may strucutre as waiting for all child process to finish then processing their data, or waiting for any child to finish and process its data.
 
   // pid_t pid;
+  // mmap is also useful for inter process communication. You can mmap a file as read / write in the processes that need to communicate and then use sychronization primitives in the mmap'd 
   totalMax = mmap(NULL, sizeof *totalMax, PROT_READ | PROT_WRITE, 
-                    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   totalMin = mmap(NULL, sizeof *totalMin, PROT_READ | PROT_WRITE, 
-                    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   * totalMin = 1000000;
   char * arr[200];
   char * pch;
@@ -36,115 +37,79 @@ int main(int argc, char **argv) {
   char buffer[1024];
   char * readFile;
   int val = 0, len, i;
-  // int fd[2];
-  // pipe(fd);
 
   count = argc - 1;
   int internalCount = 1;
 
-  // printf("Count is %d\n", count);
-
-  // int fd[2];
   int fd[2*count];
   pipe(fd); 
   int pid;
 
   for (int i = 1; i < argc; ++i) {
-    // printf("argv[%d]: %s\n", i, argv[i]);
     pid = fork();
     if (pid == 0) {
       // child process
       close(fd[1]);
       int ret = dup2(fd[0],0);
-      // len = read(fd[0], &val, sizeof(val));
-      // if (len < 0) {
-      //     perror("Child: Failed to read data from pipe");
-      //     exit(EXIT_FAILURE);
-      // }
-      // else if (len == 0)
-      // {
-      //     // not an error, but certainly unexpected
-      //     fprintf(stderr, "Child: Read EOF from pipe");
-      // }
-      // else {
-        if (ret < 0) perror("dup2");
-        // printf("\n Hello I am the child process ");
-        // printf("\n My pid is %d \n",getpid());
-        readFile = argv[i];
-        // printf("Child(%d): Received %d\n", pid, val);
-        val *= 2;
-        // printf("Child(%d): Sending %d back\n", pid, val);
-        // if (write(fd[1], &val, sizeof(val)) < 0)
-        // {
-        //     perror("Child: Failed to write response value");
-        //     exit(EXIT_FAILURE);
-        // }
-        
-        // printf("I am going to read %s\n", readFile);
-        fp = fopen(readFile, "r");
-        if (fp == NULL) 
+      if (ret < 0) perror("dup2");
+
+      readFile = argv[i];
+
+      val *= 2;
+
+      fp = fopen(readFile, "r");
+      if (fp == NULL) 
+      {
+        perror("Error opening file");
+        return(-1);
+      }
+      if( fgets (str, sizeof(str), fp)!=NULL ) 
+      {
+        pch = strtok (str, " ");
+        while (pch != NULL)
         {
-          perror("Error opening file");
-          return(-1);
-        }
-        if( fgets (str, sizeof(str), fp)!=NULL ) 
-        {
-          pch = strtok (str, " ");
-          while (pch != NULL)
-          {
-                // printf ("%s\n",pch);
-            current = atof(pch);
 
-            if (current > max) {
-              max = current;
-            }
+          current = atof(pch);
 
-            if (current < min) {
-              min = current;
-            } 
-
-            pch = strtok (NULL, " ");
+          if (current > max) {
+            max = current;
           }
 
+          if (current < min) {
+            min = current;
+          } 
+
+          pch = strtok (NULL, " ");
         }
 
-        diff = min - max;
-        sum = min + max;
+      }
 
-        if (max > *totalMax) {
-              // printf("Changing total Max: %f\n to %f\n", max, totalMax);
-          *totalMax = max;
-              // printf("Changed total Max: %f\n\n", totalMax);
-        }
-        if (min < *totalMin) {
-              // printf("Changing total Min: %f\n to %f\n", min, totalMin);
-          *totalMin = min;
-              // printf("Changed total Min: %f\n\n", totalMin);
-        }
+      diff = min - max;
+      sum = min + max;
 
-        // dup2(fd[0], totalMin);
-        // dup2(fd[0], totalMax);
+      if (max > *totalMax) {
 
-        fclose(fp);
-            // printf("*****END CHILD PROCESS *******\n");
-        snprintf(buffer, sizeof(buffer), "Filename: %s, sum: %f, diff: %f, max: %f, min: %f", readFile, sum, diff, max, min);
-            // printf("Filename: %s, sum: %f, diff: %f, max: %f, min: %f\n", readFile, diff, sum, max, min);
+        *totalMax = max;
 
-        execl("/bin/echo", "echo", buffer, NULL);
-      // }
+      }
+      if (min < *totalMin) {
+
+        *totalMin = min;
+
+      }
+
+      fclose(fp);            
+      snprintf(buffer, sizeof(buffer), "Filename: %s, sum: %f, diff: %f, max: %f, min: %f", readFile, sum, diff, max, min);            
+
+      execl("/bin/echo", "echo", buffer, NULL);      
       
     } 
   }
-
-
-  // Create one child process for more
-
-  // wait for the more process to finish
+  
   int status;
   waitpid(pid, &status, 0);
   printf("MINIMUM=%f\tMAXIUMUM=%f", *totalMin, *totalMax);
   munmap(totalMax, sizeof *totalMax);
-  munmap(totalMin, sizeof *totalMin);
-  // printf("Done!\n");
+  munmap(totalMin, sizeof *totalMin);  
   return 0;
 }
