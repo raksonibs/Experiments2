@@ -12,6 +12,11 @@ float totalMin = 100000;
 
 void *runner(void *param);
 // data shared on threads
+// aiming for
+// Filename: dataset2, sum: 100.984116, diff: -98.389618, max: 99.686867, min: 1.297250
+// Filename: dataset1, sum: 99.500092, diff: -99.390106, max: 99.445099, min: 0.054990
+// Filename: dataset3, sum: 99.915817, diff: -99.870956, max: 99.893387, min: 0.022430
+// MINIMUM=0.022430  MAXIUMUM=99.893387
 
 int main(int argc, char *argv[]) {
   // for each data set, make a child thread
@@ -38,15 +43,21 @@ int main(int argc, char *argv[]) {
 
   // get the default attributes
   pthread_attr_init(&attr);
+  // pthread_t workers[argc-1];
+  // pthread_t workers[argc - 1];
   for (int i = 1; i < argc; ++i) {
     // create thread
     pthread_create(&tid, &attr, runner, argv[i]);
-
+    pthread_join(tid, NULL); 
   }
-  // wait for thread to exit
-  pthread_join(tid, NULL);
 
-  printf("TOTAL MAXIMUM = %f\t TOTAL MININMUM = %f\t", totalMax, totalMin);
+  // for (int i = 0; i < argc; i++) { 
+  //   pthread_join(tid, NULL); 
+  // }
+  // wait for thread to exit
+  // pthread_join(tid, NULL);
+
+  printf("MINIMUM=%f\tMAXIMUM=%f", totalMin, totalMax);
 
   // define NUM_THREADS 10
   // pthread_t workers[NUM_THREADS]
@@ -57,21 +68,23 @@ int main(int argc, char *argv[]) {
 
 void *runner(void *param) {
   char * arr[200];
-  char * pch;
+  char * pch = "";
   char str[5000];
   FILE * fp;
   int count = 0;
   float max = 0;
   float min = 100000;
-  float diff;
+  float diff = 0;
   // float sum;
-  float current;
+  float current = 0;
   char buffer[1024];
-  char * readFile;
+  char * readFile = "";
   int val = 0, len, i;
   int internalCount = 1;
   int fd[2*count];
-  float sum;
+  float sum = 0;
+
+  // printf("Checking intialization of files sum: %f, current: %f, diff: %f, min: %f, max: %f\n", sum, current, diff, min, max);
 
   readFile = param;
   fp = fopen(readFile, "r");
@@ -80,7 +93,7 @@ void *runner(void *param) {
     perror("Error opening file");
     return(-1);
   }
-  if( fgets (str, sizeof(str), fp) != NULL ) 
+  if( fgets(str, sizeof(str), fp) != NULL ) 
   {
     pch = strtok (str, " ");
     while (pch != NULL)
