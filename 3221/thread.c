@@ -1,3 +1,10 @@
+/*
+Family Name: Niburski
+Given Name: Oskar
+Student Number: 212644944
+CS Login: raksonib
+*/
+
 #include <pthread.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -6,9 +13,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
+#include <math.h>
 
-float totalMax = 0;
-float totalMin = 100000;
+float totalMax = -INFINITY;
+float totalMin = INFINITY;
 
 void *runner(void *param);
 // data shared on threads
@@ -26,42 +34,23 @@ int main(int argc, char *argv[]) {
   //  then sends to main process via a pipe to standard output the filename followed by received sum and dif values
   // may strucutre as waiting for all child process to finish then processing their data, or waiting for any child to finish and process its data.
 
-  // pid_t pid;
-  // mmap is also useful for inter process communication. You can mmap a file as read / write in the processes that need to communicate and then use sychronization primitives in the mmap'd 
   pthread_t tid;
   pthread_attr_t attr;
 
-  // if (argc != 2) {
-  //   fprintf(stderr,"usage: a.out <integer value>\n");
-  //   return -1;
-  // }
 
-  // if (atoi(argv[1]) < 0) {
-  //   fprintf(stderr,"%d must be >= 0\n", atoi(argv[1]));
-  //   return -1;
-  // }
-
+  int i = 0;
   // get the default attributes
   pthread_attr_init(&attr);
-  // pthread_t workers[argc-1];
-  // pthread_t workers[argc - 1];
-  for (int i = 1; i < argc; ++i) {
+  
+  for (i = 1; i < argc; ++i) {
     // create thread
     pthread_create(&tid, &attr, runner, argv[i]);
     pthread_join(tid, NULL); 
   }
 
-  // for (int i = 0; i < argc; i++) { 
-  //   pthread_join(tid, NULL); 
-  // }
-  // wait for thread to exit
-  // pthread_join(tid, NULL);
+  // wait for thead to close
 
-  printf("MINIMUM=%f\tMAXIMUM=%f", totalMin, totalMax);
-
-  // define NUM_THREADS 10
-  // pthread_t workers[NUM_THREADS]
-  // for (int i = 0; i < NUM_THREADS; i++) { pthread_join(workers[i], NULL); }
+  printf("MINIMUM=%f\tMAXIMUM=%f\n", totalMin, totalMax);
   
   return 0;
 }
@@ -72,8 +61,8 @@ void *runner(void *param) {
   char str[5000];
   FILE * fp;
   int count = 0;
-  float max = 0;
-  float min = 100000;
+  float max = -INFINITY;
+  float min = INFINITY;
   float diff = 0;
   // float sum;
   float current = 0;
@@ -83,35 +72,31 @@ void *runner(void *param) {
   int internalCount = 1;
   int fd[2*count];
   float sum = 0;
-
-  // printf("Checking intialization of files sum: %f, current: %f, diff: %f, min: %f, max: %f\n", sum, current, diff, min, max);
+  // create local vars
 
   readFile = param;
   fp = fopen(readFile, "r");
   if (fp == NULL) 
   {
     perror("Error opening file");
-    return(-1);
+    exit(-1);
   }
-  if( fgets(str, sizeof(str), fp) != NULL ) 
-  {
-    pch = strtok (str, " ");
-    while (pch != NULL)
-    {
 
-      current = atof(pch);
-
-      if (current > max) {
-        max = current;
-      }
-
-      if (current < min) {
-        min = current;
-      } 
-
-      pch = strtok (NULL, " ");
-    }
-
+// read from file
+  while ((fscanf (fp, "%s", str)) != EOF) {
+          
+    /* Reads arguments from file
+     */
+     double temp = atof(str);
+     
+     if (temp < min)
+       min = temp; 
+     
+     if (temp > max)
+       max = temp; 
+       
+    /*Reset array str.*/
+    memset(str, '\0', 101);
   }
 
   diff = min - max;

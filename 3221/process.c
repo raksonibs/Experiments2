@@ -1,3 +1,10 @@
+/*
+Family Name: Niburski
+Given Name: Oskar
+Student Number: 212644944
+CS Login: raksonib
+*/
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -5,8 +12,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
+#include <math.h>
 
-static float * totalMax = 0;
+static float * totalMax;
 static float * totalMin;
 
 int main(int argc, char **argv) {
@@ -23,14 +31,15 @@ int main(int argc, char **argv) {
     MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   totalMin = mmap(NULL, sizeof *totalMin, PROT_READ | PROT_WRITE, 
     MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-  * totalMin = 1000000;
+  * totalMin = INFINITY;
+  * totalMax = -INFINITY;
   char * arr[200];
   char * pch;
   char str[5000];
   FILE * fp;
   int count = 0;
-  float max = 0;
-  float min = 100000;
+  float max = -INFINITY;
+  float min = INFINITY;
   float diff;
   float sum;
   float current;
@@ -45,7 +54,7 @@ int main(int argc, char **argv) {
   pipe(fd); 
   int pid;
 
-  for (int i = 1; i < argc; ++i) {
+  for (i = 1; i < argc; ++i) {
     pid = fork();
     if (pid == 0) {
       // child process
@@ -63,25 +72,23 @@ int main(int argc, char **argv) {
         perror("Error opening file");
         return(-1);
       }
-      if( fgets (str, sizeof(str), fp)!=NULL ) 
-      {
-        pch = strtok (str, " ");
-        while (pch != NULL)
-        {
 
-          current = atof(pch);
-
-          if (current > max) {
-            max = current;
-          }
-
-          if (current < min) {
-            min = current;
-          } 
-
-          pch = strtok (NULL, " ");
-        }
-
+      while ((fscanf (fp, "%s", str)) != EOF) {
+          
+        /* This part of child process reads each of the 
+         * provided file and determines maximumn as well
+         * minimum floating-point number.
+         */
+         double temp = atof(str);
+         
+         if (temp < min)
+           min = temp; 
+         
+         if (temp > max)
+           max = temp; 
+           
+        /*Reset array str.*/
+        memset(str, '\0', 101);
       }
 
       diff = min - max;
@@ -108,7 +115,7 @@ int main(int argc, char **argv) {
   
   int status;
   waitpid(pid, &status, 0);
-  printf("MINIMUM=%f\tMAXIUMUM=%f", *totalMin, *totalMax);
+  printf("MINIMUM=%f\tMAXIUMUM=%f\n", *totalMin, *totalMax);
   munmap(totalMax, sizeof *totalMax);
   munmap(totalMin, sizeof *totalMin);  
   return 0;
