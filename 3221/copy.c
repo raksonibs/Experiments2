@@ -6,6 +6,9 @@ Student Number: 212644944
 CS Login: raksonib
 */
 
+// task: 
+// Your task is to write a C program that creates two groups of Pthreads, an IN group and an OUT group, to create an exact copy of a source file passed as a command-line argument.
+
 // grab libraries
 #include <unistd.h>
 #include <string.h>
@@ -16,6 +19,24 @@ CS Login: raksonib
 #include <math.h>
 #include <pthread.h>
 
+int buffer = 0; 
+FILE *input; 
+FILE *output; 
+FILE *entire_log_stream; 
+int global_internal_count, global_external_count; 
+int internal_thread_count; 
+int *joined_workers, *possible_to_external_join_thread; 
+int i; 
+#define PAUSE_TIME 10000000
+
+// predefined struct. note: use full as a boolean tracker of whether full or empty
+typedef struct {
+  int full;
+  char data; 
+  off_t offset; 
+} BufferStruct;
+BufferStruct *mem_state;
+
 // setup various mutexes
 pthread_mutex_t increase_this_tid; 
 pthread_mutex_t decrease_this_tid; 
@@ -23,41 +44,19 @@ pthread_mutex_t increase_this_tid_out;
 pthread_mutex_t entire_program_lock; 
 pthread_mutex_t thread_completed; 
 
-// global variables setup for diff threads
-int storage_mem = 0; 
-FILE *input; 
-FILE *output; 
-FILE *entire_log_stream; 
-int internal_count, outcount; 
-int internal_thread_count_referenced; 
-int *joined_thread_workers, *can_out_join; 
-int i; 
-#define PAUSE_TIME 10000000
-
-// predefined struct. note: use full as a boolean tracker of whether full or empty
-typedef struct{
-  int full;
-  char data; 
-  off_t offset; 
-} BufferStruct;
-
-// assign pointer
-BufferStruct *mem_state;
-
 // function declarations
 int possible_empty();
 int possibly_full();
 void sleep_time();
-void *internal_threads_internal_function(void *param); 
+void *in_thread_internal_function(void *param); 
 void *external_thread_function(void *param);
 void close_and_free_files();
 
 //start
 int main(int argc, char *argv[]){
-  
   // incorrect number of arguments
   if (argc > 7 || argc < 7) {
-    fprintf(stderr, "Invalid arguments.\n");
+    fprintf(stderr, "Invalid arguments\n");
     exit(1);
   }
   
@@ -69,77 +68,70 @@ int main(int argc, char *argv[]){
   pthread_mutex_init(&decrease_this_tid, NULL);  
 
   // various argument assignments based on stdinput
-  storage_mem = atoi(argv[5]);
+  buffer = atoi(argv[5]);
   char *filename_in = argv[3];
   char *filename_out = argv[4];
   int internal_count = atoi(argv[1]);
-  int outcount = atoi(argv[2]);
-  internal_thread_count_referenced = internal_count;
-  char *logger = argv[6];
+  int external_count = atoi(argv[2]);
+  internal_thread_count = internal_count;
+  char *log_file = argv[6];
   
   //memory allocation
-  can_out_join = malloc(outcount * sizeof(int));
-  joined_thread_workers = malloc(internal_count * sizeof(int));
-  mem_state = (BufferStruct*) malloc(storage_mem * sizeof(BufferStruct));
-  // invalid values check
-  if (internal_count < 1 || outcount < 1 || storage_mem < 1)  {
-    fprintf(stderr, "Invalid values.\n");
-    exit(1);  
-  } 
-
-  // files check
+  possible_to_external_join_thread = malloc(external_count * sizeof(int));
+  joined_workers = malloc(internal_count * sizeof(int));
+  mem_state = (BufferStruct*) malloc(buffer * sizeof(BufferStruct));
+  entire_log_stream = fopen(log_file, "w");
   output = fopen(filename_out, "w");
   input = fopen(filename_in, "r");
-  entire_log_stream = fopen(logger, "w");
-  if (input == NULL || output == NULL || entire_log_stream == NULL || joined_thread_workers == NULL || can_out_join == NULL) {
-    fprintf(stderr, "Invalid file and memory allocation.\n"); 
+
+  if (entire_log_stream == NULL || joined_workers == NULL || possible_to_external_join_thread == NULL || output == NULL || internal_count < 1 || external_count < 1 || buffer < 1 || input == NULL) {
+    fprintf(stderr, "Invalid Arguments\n"); 
     exit(1);
   }
   
   //time to set up workers
-  pthread_t internal_threads[internal_count];
-  pthread_t external_threads[outcount];
-  
-  // printf("Creating the mem_state acting as mem state: \n");
-  
+  pthread_t in_thread[internal_count];
+  pthread_t out_thread[external_count];
+
   // assign all mem_states to initial state of empty
-  for (int traversed_num = 0; traversed_num < storage_mem; traversed_num++) {
+  for (int traversed_num = 0; traversed_num < buffer; traversed_num++) {
     mem_state[traversed_num].full = 0;
   }
   
-  // printf("Creating and executing threads: \n");
-  
   // create the input and output threads
   for (int traversed_num = 0; traversed_num < internal_count; traversed_num++) {
-    pthread_create(&internal_threads[traversed_num], NULL, (void *) internal_threads_internal_function, input);
-  }  
+    pthread_create(&in_thread[traversed_num], NULL, (void *) in_thread_internal_function, input);
+  }
   
-  for (int traversed_num = 0; traversed_num < outcount; traversed_num++) {
-    pthread_create(&external_threads[traversed_num], NULL, (void *) external_thread_function, output);  
-  }  
+  for (int traversed_num = 0; traversed_num < external_count; traversed_num++) {
+    pthread_create(&out_thread[traversed_num], NULL, (void *) external_thread_function, output);  
+  }
+  
+  for (int traversed_num = 0; traversed_num < internal_count; traversed_num++) {
+    while(joined_workers[traversed_num] == 0);  
+  }
   
   // execute on the threads by checking wthther state of internal threads is joined, or able to join via for loop and while loop
-  for (int traversed_num = 0; traversed_num < internal_count; traversed_num++) {
-    while(joined_thread_workers[traversed_num] == 0);  
+  for (int traversed_num = 0; traversed_num < external_count; traversed_num++) {
+    while(possible_to_external_join_thread[traversed_num] == 0);
   }
-  
-  for (int traversed_num = 0; traversed_num < outcount; traversed_num++) {
-    while(can_out_join[traversed_num] == 0);
-  }
-  
-  // assign threas to internal 
+
+  // assign threas to internal
   for (int traversed_num = 0; traversed_num < internal_count; traversed_num++) {
-    pthread_join(internal_threads[traversed_num], NULL);
+    pthread_join(in_thread[traversed_num], NULL);
   }
   
   // assign threads to external via join
-  for (int traversed_num = 0; traversed_num < outcount; traversed_num++) {
-    pthread_join(external_threads[traversed_num], NULL);
+  for (int traversed_num = 0; traversed_num < external_count; traversed_num++) {
+    pthread_join(out_thread[traversed_num], NULL);
   }
-  
-  // printf("Completed.\n");
-  //free memory!
-  close_and_free_files();
+
+  fclose(input);  
+  fclose(entire_log_stream);
+  fclose(output);
+  free(mem_state); 
+  free(joined_workers);
+  free(possible_to_external_join_thread);
 
   exit(0);
 }
@@ -148,191 +140,164 @@ int main(int argc, char *argv[]){
 void sleep_time() {
   struct timespec t;
   t.tv_sec = 0;
-  t.tv_nsec = rand() % (PAUSE_TIME+1); 
+  t.tv_nsec = rand()%(PAUSE_TIME+1); 
   nanosleep(&t, NULL);
 }
 
 // checks if mem state if emtpy or not
-int possible_empty() {
-  for (int i = 0; i < storage_mem; i++) {
-    if(mem_state[i].full == 0) {
-      return i;
-    }
-  }
-
-  return -1;
-}
-
-// checks if full
 int possibly_full() {
-  for (int i = 0; i < storage_mem; i++) {
+  int return_val = -1;
+  for (int i = 0; i < buffer; i++) {
     if (mem_state[i].full == 1) {
-      return i;
+      return_val = i;
+      return return_val;
     }
   }
-
-  return -1;
+  return return_val;
+}
+// checks if mem state if emtpy or not
+int possible_empty() {
+  int return_val = -1;
+  for (int i = 0; i < buffer; i++) {
+    if (mem_state[i].full == 0) {
+      return_val = i;
+      return return_val;
+    }
+  }
+  return return_val;
 }
 
 //all the magic, makes them sleep, locks and then unlocks the variable to work on the critical internal count code
-void *internal_threads_internal_function(void *param){
-  
+void *in_thread_internal_function(void *param){
+
   sleep_time();
   
-  int pos;
+  int possibility = 0;
   char c;
-  int address_of_memory;
-  int local_internal_count;
+  int address;
+  int local_internal_ref;
   
   // unlocking locking part
   pthread_mutex_lock(&increase_this_tid);
-  local_internal_count = internal_count++;
+  local_internal_ref = global_internal_count++;
   pthread_mutex_unlock(&increase_this_tid);
   
   // checks input and whether end of line
   while (!feof(input)) {
-    
-    // locks entire program
+    //mtx lock on entire progrma
     pthread_mutex_lock(&entire_program_lock);
-    pos = possible_empty();     
+    possibility = possible_empty();     
 
-    while (pos != -1){
+    //if possiblity is not -1, so empty
+    while (possibility != -1){
+
+      // get address
+      address = ftell(input);
       c = fgetc(input);
-      // ftell is a sneaky way of grabbing an inputs tmp mem address
-      address_of_memory = ftell(input);
-      // output to log stream
-      if (fprintf(entire_log_stream, "read_byte PT%d O%d B%d I-1\n", local_internal_count, address_of_memory, c) < 0) {
-        fprintf(stderr, "Please provide valid files.\n");
+      //get input val
+      //output to local incoutn
+      if (fprintf(entire_log_stream, "read_byte PT%d O%d B%d I-1\n", local_internal_ref, address, c) < 0) {        
         exit(1);
       }
-      // check for line end
+      
       if (c == EOF){
         break;
       }
-      
+
       else { 
-        // set mem_state data
-        mem_state[pos].data = c;
-        mem_state[pos].offset = address_of_memory;
-        mem_state[pos].full = 1;
+        mem_state[possibility].data = c;
+        mem_state[possibility].offset = address;
+        mem_state[possibility].full = 1;
       }
-      // output to log stream
-      if (fprintf(entire_log_stream, "produce PT%d O%d B%d I%d\n", local_internal_count, address_of_memory, c, pos) < 0) {
-        fprintf(stderr, "Please provide valid files.\n");
+      
+      if (fprintf(entire_log_stream, "produce PT%d O%d B%d I%d\n", local_internal_ref, address, c, possibility) < 0) {        
         exit(1);
       }
-      // check again
-      pos = possible_empty();
-      // set thread to sleep
+
+      possibility = possible_empty();
+      
       sleep_time();
     }
-    // done so can unlock
+    
     pthread_mutex_unlock(&entire_program_lock);
 
-  }
-  
-  // unlock and lock workers
+  };
+
   pthread_mutex_lock(&decrease_this_tid);
-  internal_thread_count_referenced--;
+  internal_thread_count--;
   pthread_mutex_unlock(&decrease_this_tid);
   
   pthread_mutex_lock(&thread_completed);
-  joined_thread_workers[local_internal_count] = 1;
+  joined_workers[local_internal_ref] = 1;
   pthread_mutex_unlock(&thread_completed);
   
   sleep_time();  
   
   pthread_exit(0);
 }
-//closes
-void close_and_free_files() {
-  fclose(entire_log_stream);
-  fclose(output);
-  fclose(input);  
-  free(joined_thread_workers);
-  free(can_out_join);
-  free(mem_state); 
-}
 
+//all the magic, makes them sleep, locks and then unlocks the variable to work on the critical external count code
 void *external_thread_function(void *param){
-  
+  //set up local vars and external ref
   sleep_time();  
   
-  //local variables
-  int in_threads_running;
-  int out_count;
-  int pos = 0;
+  int external_count;
+  int number_of_internal_threads;
+  int possibility = 0;
   char c;
   int address;
   int val;
-  
-  //increment thread count
-  pthread_mutex_lock(&increase_this_tid);
-  out_count = outcount++;
-  pthread_mutex_unlock(&increase_this_tid);
+  //mutx locks
+  pthread_mutex_lock(&increase_this_tid_out);
+  external_count = global_external_count++;
+  pthread_mutex_unlock(&increase_this_tid_out);
 
   do {
-    // critical section to read in the first item to be outputted
-    pos = possibly_full();
+    //check if full
+    possibility = possibly_full();
 
-    if (pos != -1){
-      
-      //obtain lock for consuming
+    if (possibility != -1){
+
+      //lock program
       pthread_mutex_lock(&entire_program_lock);
-      pos = possibly_full(); 
+      possibility = possibly_full(); 
+      // setup data
+      address = mem_state[possibility].offset;
+      c = mem_state[possibility].data;
       
-      //consume mem_state 
-      address = mem_state[pos].offset;
-      c = mem_state[pos].data;
-      
-      //write to log file
-      if (fprintf(entire_log_stream, "consume CT%d O%d B%d I%d\n", out_count, address, c, pos) < 0) {
-        fprintf(stderr, "\tProvide Valid Log File!\n\tExiting Now!\n");
+      if (fprintf(entire_log_stream, "consume CT%d O%d B%d I%d\n", external_count, address, c, possibility) < 0) {        
         exit(1);
       }
+      //reassign offset and full boolean
+      mem_state[possibility].full = 0;
+      mem_state[possibility].offset = 0;
       
-      // store empty character to mem_state and indicate that it is empty
-      mem_state[pos].full = 0;
-      mem_state[pos].offset = 0;
-      
-      //release lock
+      //lock and unlock
       pthread_mutex_unlock(&entire_program_lock);
-
-      //obtain lock for writing
       pthread_mutex_lock(&entire_program_lock);
       
-      // critical section for writing to file 
+      //sneaky way of grabbing address
       val = fseek(output, address, SEEK_SET);
-      if (val < 0) {
-        pthread_mutex_unlock(&entire_program_lock);
-          fprintf(stderr, "\tProvide Valid Seek!\n\tExiting Now!\n");
+      if (fputc(c, output) == EOF || val < 0) {
+        pthread_mutex_unlock(&entire_program_lock);          
         exit(1);
       }
-      if (fputc(c, output) == EOF) {
-        pthread_mutex_unlock(&entire_program_lock);
-          fprintf(stderr, "\tInvalid File Write!\n\tExiting Now!\n");
+      //wirte to file
+      if (fprintf(entire_log_stream, "write_byte CT%d O%d B%d I-1\n", external_count, address, c) < 0) {        
         exit(1);
       }
-      
-      //write to log file
-      if (fprintf(entire_log_stream, "write_byte CT%d O%d B%d I-1\n", out_count, address, c) < 0) {
-        fprintf(stderr, "\tProvide Valid Log File!\n\tExiting Now!\n");
-        exit(1);
-      }
-      
-      //release lock
+      //critical section done, unlock yo!
       pthread_mutex_unlock(&entire_program_lock);
     }
+
     sleep_time();
-    
-    //assign thread count for exiting
-    in_threads_running = internal_thread_count_referenced;
-  
-  } while (in_threads_running > 0 || pos != -1);
-  
-  //let main() know thread has finished
+    number_of_internal_threads = internal_thread_count;
+
+  } while (number_of_internal_threads > 0 || possibility != -1);
+
+  //unlock and lock code for external code (similiar to internal count)
   pthread_mutex_lock(&thread_completed);
-  can_out_join[out_count] = 1;
+  possible_to_external_join_thread[external_count] = 1;
   pthread_mutex_unlock(&thread_completed);
   
   pthread_exit(0);
