@@ -75,6 +75,7 @@ int main(int argc, char *argv[]){
   int external_count = atoi(argv[2]);
   internal_thread_count = internal_count;
   char *log_file = argv[6];
+  int traversed_num = 0;
   
   //memory allocation
   possible_to_external_join_thread = malloc(external_count * sizeof(int));
@@ -94,35 +95,35 @@ int main(int argc, char *argv[]){
   pthread_t out_thread[external_count];
 
   // assign all mem_states to initial state of empty
-  for (int traversed_num = 0; traversed_num < buffer; traversed_num++) {
+  for (traversed_num = 0; traversed_num < buffer; traversed_num++) {
     mem_state[traversed_num].full = 0;
   }
   
   // create the input and output threads
-  for (int traversed_num = 0; traversed_num < internal_count; traversed_num++) {
+  for (traversed_num = 0; traversed_num < internal_count; traversed_num++) {
     pthread_create(&in_thread[traversed_num], NULL, (void *) in_thread_internal_function, input);
   }
   
-  for (int traversed_num = 0; traversed_num < external_count; traversed_num++) {
+  for (traversed_num = 0; traversed_num < external_count; traversed_num++) {
     pthread_create(&out_thread[traversed_num], NULL, (void *) external_thread_function, output);  
   }
   
-  for (int traversed_num = 0; traversed_num < internal_count; traversed_num++) {
+  for (traversed_num = 0; traversed_num < internal_count; traversed_num++) {
     while(joined_workers[traversed_num] == 0);  
   }
   
   // execute on the threads by checking wthther state of internal threads is joined, or able to join via for loop and while loop
-  for (int traversed_num = 0; traversed_num < external_count; traversed_num++) {
+  for (traversed_num = 0; traversed_num < external_count; traversed_num++) {
     while(possible_to_external_join_thread[traversed_num] == 0);
   }
 
   // assign threas to internal
-  for (int traversed_num = 0; traversed_num < internal_count; traversed_num++) {
+  for (traversed_num = 0; traversed_num < internal_count; traversed_num++) {
     pthread_join(in_thread[traversed_num], NULL);
   }
   
   // assign threads to external via join
-  for (int traversed_num = 0; traversed_num < external_count; traversed_num++) {
+  for (traversed_num = 0; traversed_num < external_count; traversed_num++) {
     pthread_join(out_thread[traversed_num], NULL);
   }
 
@@ -147,7 +148,8 @@ void sleep_time() {
 // checks if mem state if emtpy or not
 int possibly_full() {
   int return_val = -1;
-  for (int i = 0; i < buffer; i++) {
+  int i;
+  for (i = 0; i < buffer; i++) {
     if (mem_state[i].full == 1) {
       return_val = i;
       return return_val;
@@ -158,7 +160,8 @@ int possibly_full() {
 // checks if mem state if emtpy or not
 int possible_empty() {
   int return_val = -1;
-  for (int i = 0; i < buffer; i++) {
+  int i;
+  for (i = 0; i < buffer; i++) {
     if (mem_state[i].full == 0) {
       return_val = i;
       return return_val;
