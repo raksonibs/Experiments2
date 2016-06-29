@@ -45,8 +45,6 @@ pthread_mutex_t entire_program_lock;
 pthread_mutex_t thread_completed; 
 
 // function declarations
-int possible_empty();
-int possibly_full();
 void sleep_time();
 void *in_thread_internal_function(void *param); 
 void *external_thread_function(void *param);
@@ -145,31 +143,6 @@ void sleep_time() {
   nanosleep(&t, NULL);
 }
 
-// checks if mem state if emtpy or not
-int possibly_full() {
-  int return_val = -1;
-  int i;
-  for (i = 0; i < buffer; i++) {
-    if (mem_state[i].full == 1) {
-      return_val = i;
-      return return_val;
-    }
-  }
-  return return_val;
-}
-// checks if mem state if emtpy or not
-int possible_empty() {
-  int return_val = -1;
-  int i;
-  for (i = 0; i < buffer; i++) {
-    if (mem_state[i].full == 0) {
-      return_val = i;
-      return return_val;
-    }
-  }
-  return return_val;
-}
-
 //all the magic, makes them sleep, locks and then unlocks the variable to work on the critical internal count code
 void *in_thread_internal_function(void *param){
 
@@ -188,8 +161,15 @@ void *in_thread_internal_function(void *param){
   // checks input and whether end of line
   while (!feof(input)) {
     //mtx lock on entire progrma
-    pthread_mutex_lock(&entire_program_lock);
-    possibility = possible_empty();     
+    pthread_mutex_lock(&entire_program_lock);    
+    possibility = -1;
+    int i;
+    for (i = 0; i < buffer; i++) {
+      if (mem_state[i].full == 0) {
+        possibility = i;
+        break;
+      }
+    }
 
     //if possiblity is not -1, so empty
     while (possibility != -1){
@@ -217,7 +197,14 @@ void *in_thread_internal_function(void *param){
         exit(1);
       }
 
-      possibility = possible_empty();
+      possibility = -1;
+      int i;
+      for (i = 0; i < buffer; i++) {
+        if (mem_state[i].full == 0) {
+          possibility = i;
+          break;
+        }
+      }      
       
       sleep_time();
     }
@@ -257,13 +244,28 @@ void *external_thread_function(void *param){
 
   do {
     //check if full
-    possibility = possibly_full();
+    possibility = -1;
+    int i;
+    for (i = 0; i < buffer; i++) {
+      if (mem_state[i].full == 1) {
+        possibility = i;
+        break;
+      }
+    }
+     
 
     if (possibility != -1){
 
       //lock program
       pthread_mutex_lock(&entire_program_lock);
-      possibility = possibly_full(); 
+      possibility = -1;
+      int i;
+      for (i = 0; i < buffer; i++) {
+        if (mem_state[i].full == 1) {
+          possibility = i;
+          break;
+        }
+      }
       // setup data
       address = mem_state[possibility].offset;
       c = mem_state[possibility].data;
