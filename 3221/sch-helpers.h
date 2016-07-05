@@ -62,9 +62,8 @@ struct process {
 
 /* a node in a linked list of processes */
 struct process_node {
-    process *data;
+   process *data;
     process_node *next;
-    process_node *prev;
 };
 
 /* FIFO queue implemented as a singly-linked list */
@@ -83,18 +82,9 @@ void error_bad_quantum(void);
 
 /** Queue management functions **/
 process_node *createProcessNode(process *);
-void initializePQueue(process_queue *);
-void enqueuePNode(process_queue *, process_node *);
-void enqueuePNode_atFront(process_queue *, process_node *);
+void initializeProcessQueue(process_queue *);
 void enqueueProcess(process_queue *, process *);
-process_node *dequeueProcess(process_queue *);
-void deleteProcess(process_queue *);
-process_node *containsPNode(process_queue *, process_node *);
-process_node *containsProcess(process_queue *, process *);
-process_node *dequeuePNode_Spec(process_queue *, process_node *);
-void deletePNode_Spec(process_queue *, process_node *);
-void transferProcess(process_queue *, process_queue *);
-void transferProcess_Spec(process_queue *, process_queue *, process_node *);
+void dequeueProcess(process_queue *);
 
 /** Input/output functions **/
 char *readLine(void);
@@ -102,6 +92,5 @@ char *readLineHelper(char *, int);
 int readInt(char **);
 int readBracedInt(char **);
 int empty(char *);
-int readProcess(process *, int);
+int readProcess(process *);
 int compareByArrival(const void *, const void *);
-

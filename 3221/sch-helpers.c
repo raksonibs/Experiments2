@@ -70,12 +70,12 @@ void error_malformed_input_line(char *line) {
         }
     }
     fprintf(stderr, "Error - malformed input line:\n%s\n"
-        "Expected integral values in range [0, 2^31-1], in format:\n"
-        "    \"pid arrival cpu-burst (io-burst) cpu-burst "
-        "(io-burst) ... cpu-burst\"\n"
-        "    (every process having between 1 and %d bursts, "
-        "ending on a CPU burst)\n",
-        line, MAX_BURSTS);
+                    "Expected integral values in range [0, 2^31-1], in format:\n"
+                    "    \"pid arrival cpu-burst (io-burst) cpu-burst "
+                    "(io-burst) ... cpu-burst\"\n"
+                    "    (every process having between 1 and %d bursts, "
+                         "ending on a CPU burst)\n",
+                    line, MAX_BURSTS);
     exit(-1);
 }
 
@@ -83,8 +83,8 @@ void error_malformed_input_line(char *line) {
    then abnormally terminate. */
 void error_too_many_bursts(int pid) {
     fprintf(stderr, "Error - too many bursts provided for process with id %d.\n"
-        "Total number of CPU or I/O bursts must not exceed %d (or %d combined).\n",
-        pid, MAX_BURSTS/2, MAX_BURSTS);
+                    "Total number of CPU or I/O bursts must not exceed %d (or %d combined).\n",
+                    pid, MAX_BURSTS/2, MAX_BURSTS);
     exit(-1);
 }
 
@@ -109,158 +109,49 @@ process_node *createProcessNode(process *p) {
     process_node *node = (process_node*) malloc(sizeof(process_node));
     if (node == NULL) error("out of memory");
     node->data = p;
-    node->next = node->prev = NULL;
+    node->next = NULL;
     return node;
 }
 
-/* constructor for process queue 'q' */
-void initializePQueue(process_queue *q) {
+/* performs basic initialization on the process queue `q' */
+void initializeProcessQueue(process_queue *q) {
     q->front = q->back = NULL;
     q->size = 0;
 }
 
-/* enqueues a process_node 'n' at the back of the process queue 'q' 
-   Note: similar to void enqueueProcess, except takes process_node 
-   instead of process*/
-void enqueuePNode(process_queue *q, process_node *n){
-    if(q->size == 0) // queue is empty
-    {
-        assert(q->front == NULL && q->back == NULL);
-        q->front = q->back = n;
-        n->next = n->prev = NULL;
-    }
-    else // queue contains at least one element
-    {
-        assert(q->back != NULL);
-        n->prev = q->back; // backlink to old tail
-        q->back->next = n; // insert at back
-        q->back = n; // set back pointer to newly inserted node
-        q->back->next = NULL; // null-terminate tail link
-    }
-    q->size++;
-}
+/* enqueues a process `p' at the back of the process queue pointed to by `q'.
+   warning: Process pointer `p' must not point to a temporary memory location.
+            It must be accessible for as long as the queue is. */
 
-/* enqueues a process_node 'n' at the FRONT of the process queue 'q' */
-void enqueuePNode_atFront(process_queue *q, process_node *n) {
-    if(q->size == 0) // queue is empty
-    {
-        assert(q->front == NULL && q->back == NULL);
-        q->front = q->back = n;
-        n->next = n->prev = NULL;
-    }
-    else // queue contains at least one element
-    {
-        assert(q->front != NULL);
-        n->prev = NULL; // null-terminate the new head link
-        n->next = q->front; // insert at front
-        q->front->prev = n; // backlink old head to new head
-        q->front = n; // set head pointer to newly-inserted node
-    }
-    q->size++;
-}
-
-/* enqueues a process 'p' at the back of the process queue 'q' */
 void enqueueProcess(process_queue *q, process *p) {
     process_node *node = createProcessNode(p);
-    enqueuePNode(q, node); // simply call below method with our node
+
+    if (q->front == NULL) {
+        assert(q->back == NULL);
+        q->front = q->back = node;
+    } else {
+        assert(q->back != NULL);
+        q->back->next = node;
+        q->back = node;
+    }
+    q->size++;
 }
 
-/* dequeues a process from the front of the process queue 'q' 
-   Note: this version does not free the memory */
-process_node *dequeueProcess(process_queue *q) {
+/* dequeues a process from the front of the process queue pointed to by `q' */
+void dequeueProcess(process_queue *q) {
+    process_node *deleted = q->front;
+
     assert(q->size > 0);
-    process_node *dequeued = q->front;
-    if (q->size == 1)
-    {
+    if (q->size == 1) {
         q->front = NULL;
         q->back = NULL;
-    }
-    else
-    {
-        assert(q->front->next != NULL); //already covered this case
+    } else {
+        assert(q->front->next != NULL);
         q->front = q->front->next;
-        q->front->prev = NULL; // null-terminate head link
     }
+    free(deleted);
     q->size--;
-    dequeued->next = dequeued->prev = NULL;
-    return dequeued;
 }
-
-/* dequeues a process from the front of the process queue 'q' */
-void deleteProcess(process_queue *q) {
-    free(dequeueProcess(q));
-}
-
-/* searches the queue 'q' for node 'n'.
-   returns pointer to n if match is found; NULL otherwise*/
-process_node *containsPNode(process_queue *q, process_node *n)
-{
-    if(q->size == 0) return NULL; // queue is empty, no match possible
-    process_node *temp = q->front;
-    while(1) // traverse queue until we hit tail
-    {
-        if(temp == n) return temp;
-        if(temp->next == NULL) break;
-        temp = temp->next;
-    }
-    return NULL; // if we reached this statement, no match found    
-}
-
-/* searches the queue 'q' for process 'p'.
-   returns pointer to node containing 'p' if match is found; NULL otherwise*/
-process_node *containsProcess(process_queue *q, process *p)
-{
-    if(q->size == 0) return NULL; // queue is empty, no match possible
-    process_node *temp = q->front;
-    while(1) // traverse queue until we hit tail
-    {
-        if(temp->data == p) return temp;
-        if(temp->next == NULL) break;
-        temp = temp->next;
-    }
-    return NULL; // if we reached this statement, no match found        
-}
-
-/* dequeues a SPECIFIED process from the process queue
-   Note: this version does not free the memory */
-process_node *dequeuePNode_Spec(process_queue *q, process_node *n)
-{
-    assert(q->size > 0); // queue is not empty
-    assert(containsPNode(q, n) != NULL); // and actually contains n
-    if(n == q->front) return dequeueProcess(q);
-    else if(n == q->back)
-    {
-        q->back = q->back->prev;
-        q->back->next = NULL; // null-terminate tail link
-    }
-    else // n is somewhere in the middle
-    {
-        n->next->prev = n->prev; // back link skip
-        n->prev->next = n->next; // forward link skip
-    }
-    q->size--;
-    n->next = n->prev = NULL;
-    return n;
-}
-
-/* dequeues a SPECIFIED process from the process queue */
-void deletePNode_Spec(process_queue *q, process_node *n)
-{
-    free(dequeuePNode_Spec(q, n));
-}
-
-/* transfers a process from the front of 'q1' to the back of 'q2'*/
-void transferProcess(process_queue *q1, process_queue *q2)
-{
-    enqueuePNode(q2, dequeueProcess(q1));
-}
-
-/* transfers a SPECIFIED process from 'q1', to the back of 'q2'*/
-void transferProcess_Spec(process_queue *q1, process_queue *q2, process_node *n)
-{
-    enqueuePNode(q2, dequeuePNode_Spec(q1, n));
-}
-
 
 /** Input/output functions **/
 
@@ -320,7 +211,7 @@ int readInt(char **buf) {
         result = new_result;
         (*buf)++;
     }
-
+    
     return result;
 }
 
@@ -372,8 +263,8 @@ int empty(char *s) {
    more process(es) to be read in the input, and 0 otherwise.
    (also returns COMMENT_LINE in event of a comment, signified by a leading
     COMMENT_CHAR character, being read.) */
-int readProcess(process *dest, int timeslice) {
-    //int i;
+int readProcess(process *dest) {
+    int i;
     int pid = -1;
     int arrivalTime = 0;
     int firstBurst = 0;
@@ -399,17 +290,13 @@ int readProcess(process *dest, int timeslice) {
     dest->bursts[0].length = firstBurst;
     dest->bursts[0].step = 0;
     dest->numberOfBursts = 1;
-    dest->currentBurst = 0;
-    dest->waitingTime = 0;
-    dest->quantumRemaining = timeslice;
-    dest->currentQueue = 1;
     
     /* read in the rest of the io and cpu bursts in pairs ([IO, CPU], ...) */
     while (!empty(ptr)) {
         
-                /* get and save I/O burst, erroring out if it cannot be read */
+        /* get and save I/O burst, erroring out if it cannot be read */
         if ((ioBurstLength = readBracedInt(&ptr)) == -1) {
-                error_malformed_input_line(line);
+            error_malformed_input_line(line);
         }
         dest->bursts[dest->numberOfBursts].step = 0;
         dest->bursts[dest->numberOfBursts].length = ioBurstLength;
@@ -419,9 +306,9 @@ int readProcess(process *dest, int timeslice) {
         if ((cpuBurstLength = readInt(&ptr)) == -1) {
             error_malformed_input_line(line);
         }
-            /* check for too many bursts first!
-               (here is where we will see the 1001th burst if it occurs) */
-            if (dest->numberOfBursts == MAX_BURSTS) {
+        /* check for too many bursts first!
+          (here is where we will see the 1001th burst if it occurs) */
+        if (dest->numberOfBursts == MAX_BURSTS) {
             error_too_many_bursts(dest->pid);
         }
         dest->bursts[dest->numberOfBursts].step = 0;
