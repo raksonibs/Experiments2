@@ -226,7 +226,7 @@ void moveCurrentlyActiveAndRunningProcesses(void) {
 
 
             while (1) {
-        moveIncomingProcesses(); =
+        moveIncomingProcesses();
         moveCurrentlyActiveAndRunningProcesses();   
         moveWaitingProcesses();   
         moveReadyProcesses();    
