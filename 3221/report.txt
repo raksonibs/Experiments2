@@ -1,0 +1,8 @@
+Family Name: Niburski
+Given Name: Oskar
+Student Number: 212644944
+CS Login: raksonib
+
+
+In this project, we were asked to implement three algorithms. These algorithims, 
+

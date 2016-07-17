@@ -18,8 +18,8 @@ process processes[MAX_PROCESSES + 1];
 process *CPU[NUMBER_OF_PROCESSORS];
 process_queue readyQue, waitQue; 
 
-int Clock;                    
-int ClockCPU;           
+int clockRepresented;                    
+int clockRepresentedCPU;           
 int numberOfProcesses = 0;    
 int ProcessNextComCount = 0;  
 int i;
@@ -34,7 +34,7 @@ int quantumtwo = 0;
 void Move(){
 
   for (i = 0; i < numberOfProcesses; i++){
-    if (processes[i].arrivalTime == Clock){
+    if (processes[i].arrivalTime == clockRepresented){
       processes[i].currentQueue = 1;
       enqueueProcess(&readyQue, &processes[i]); 
     }
@@ -64,9 +64,9 @@ void Move(){
         
         if (CPU[t]->currentBurst >= CPU[t]->numberOfBursts) {
 
-          CPU[t]->endTime = Clock;
+          CPU[t]->endTime = clockRepresented;
           ProcessNextComCount++;
-          printf("%d Processes finished.\n", ProcessNextComCount);                  
+          // printf("%d Processes finished.\n", ProcessNextComCount);                  
         }
         else {
           enqueueProcess(&waitQue, CPU[t]);
@@ -117,7 +117,7 @@ void Update(){
   for (t=0; t<NUMBER_OF_PROCESSORS; t++){
     if (CPU[t]!=NULL){
       CPU[t]->bursts[CPU[t]->currentBurst].step++;
-      ClockCPU++;     
+      clockRepresentedCPU++;     
       CPU[t]->quantumRemaining--;     
     }   
   }
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]){
   qsort(processes, numberOfProcesses, sizeof(process), compareByArrival);
 
   //loop through processes
-  for (Clock = 0; ProcessNextComCount <numberOfProcesses; Clock++){
+  for (clockRepresented = 0; ProcessNextComCount <numberOfProcesses; clockRepresented++){
     Move();
     Update();
   }
@@ -169,12 +169,12 @@ int main(int argc, char *argv[]){
   
   printf("Average waiting time                 : %.2f units\n", ((double)waitTime/numberOfProcesses));
   printf("Average turnaround time              : %.2f units\n", (turnAroundTimes / (double)numberOfProcesses));
-  printf("Time all processes finished          : %d\n", Clock - 1);
-  printf("Average CPU utilization       : %.1f  %% \n", ((100 * ClockCPU)/(double)( Clock-1)));
+  printf("Time all processes finished          : %d\n", clockRepresented - 1);
+  printf("Average CPU utilization              : %.1f  %% \n", ((100 * clockRepresentedCPU)/(double)( clockRepresented-1)));
   printf("Number of context switches           : %d\n", countextSwitch);
-  printf("PID(s) of last process(es) to finish  : ");
+  printf("PID(s) of last process(es) to finish : ");
   for (i = 0; i<numberOfProcesses; i++) {
-    if (processes[i].endTime == (Clock-1)) {
+    if (processes[i].endTime == (clockRepresented-1)) {
       printf("%d ", processes[i].pid);
     }
   } 
