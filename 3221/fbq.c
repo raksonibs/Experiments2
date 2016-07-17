@@ -16,25 +16,25 @@ CS Login: raksonib
 //Create Global Variables
 process processes[MAX_PROCESSES + 1];
 process *CPU[NUMBER_OF_PROCESSORS];
-process_queue readyQue, waitQue; 
+process_queue readyQueue, waitQueue; 
 
 int clockRepresented;                    
 int clockRepresentedCPU;           
 int numberOfProcesses = 0;    
-int ProcessNextComCount = 0;  
+int processNextCount = 0;  
 int i;
-int ReadIn = 0;
+int readInput = 0;
 int waitTime = 0;
 int turnAroundTimes = 0;
-int countextSwitch = 0;
-int quantumnumber = 0;
-int quantumtwo = 0;
+int contextSwitch = 0;
+int quantumOne = 0;
+int quantumTwo = 0;
 
 void setupPrintVariables() {
   int i = 0;
 
   //calculate and display values
-  while (i < numberOfProcesses){
+  while (i < numberOfProcesses) {
     waitTime = waitTime + processes[i].waitingTime;
     turnAroundTimes = turnAroundTimes + processes[i].endTime - processes[i].arrivalTime;
     i++;
@@ -47,21 +47,20 @@ void moveIntoQueues(){
   for (i = 0; i < numberOfProcesses; i++){
     if (processes[i].arrivalTime == clockRepresented){
       processes[i].currentQueue = 1;
-      enqueueProcess(&readyQue, &processes[i]); 
+      enqueueProcess(&readyQueue, &processes[i]); 
     }
   }
 
-  for (i = 0; i < waitQue.size; i++){
-    process *quefront = waitQue.front->data;
-    dequeueProcess(&waitQue);
+  for (i = 0; i < waitQueue.size; i++){
+    process *queueFront = waitQueue.front->data;
+    dequeueProcess(&waitQueue);
 
-    if (quefront->bursts[quefront->currentBurst].step >= quefront->bursts[quefront->currentBurst].length){    
-      quefront->currentBurst++;
-      enqueueProcess(&readyQue, quefront);
+    if (queueFront->bursts[queueFront->currentBurst].step >= queueFront->bursts[queueFront->currentBurst].length){    
+      queueFront->currentBurst++;
+      enqueueProcess(&readyQueue, queueFront);
     }
     else {
-      enqueueProcess(&waitQue, quefront); 
-      //printf("\r ioburst - waiting size: %d.....", waitQue.size);
+      enqueueProcess(&waitQueue, queueFront);       
     }
   }
 
@@ -76,11 +75,10 @@ void moveIntoQueues(){
         if (CPU[t]->currentBurst >= CPU[t]->numberOfBursts) {
 
           CPU[t]->endTime = clockRepresented;
-          ProcessNextComCount++;
-          // printf("%d Processes finished.\n", ProcessNextComCount);                  
+          processNextCount++;          
         }
         else {
-          enqueueProcess(&waitQue, CPU[t]);
+          enqueueProcess(&waitQueue, CPU[t]);
         }
         CPU[t] = NULL;
       // Check if quantum expired
@@ -88,20 +86,22 @@ void moveIntoQueues(){
         if (CPU[t]->quantumRemaining <= 0){ 
           // increment queue count (FBQ)
           CPU[t]->currentQueue++;       
-          enqueueProcess(&readyQue, CPU[t]);
+          enqueueProcess(&readyQueue, CPU[t]);
           CPU[t]=NULL;
-          countextSwitch++;
+          contextSwitch++;
         }
       }     
     }
     // add new process
-    if (CPU[t] == NULL && readyQue.size > 0){
-      CPU[t] = readyQue.front->data;
-      if (CPU[t]->currentQueue == 1)
-        CPU[t]->quantumRemaining = quantumnumber;
-      else 
-        CPU[t]->quantumRemaining = quantumtwo;
-      dequeueProcess(&readyQue);  
+    if (CPU[t] == NULL && readyQueue.size > 0){
+      CPU[t] = readyQueue.front->data;
+      if (CPU[t]->currentQueue == 1){
+        CPU[t]->quantumRemaining = quantumOne;
+      }
+      else {
+        CPU[t]->quantumRemaining = quantumTwo;
+      }
+      dequeueProcess(&readyQueue);  
     }
   }
 }
@@ -110,22 +110,21 @@ void moveIntoQueues(){
 void updateQueues() {
   process * temp;
   int i;
-  for (i= 0; i < readyQue.size; i++){
-    temp = readyQue.front->data;
+  for (i= 0; i < readyQueue.size; i++) {
+    temp = readyQueue.front->data;
     temp->waitingTime++;
-    dequeueProcess(&readyQue);
-    enqueueProcess(&readyQue,temp);
+    dequeueProcess(&readyQueue);
+    enqueueProcess(&readyQueue,temp);
   }
   temp = NULL;
   int t;
-  for (t = 0; t < waitQue.size; t++)
-  {
-    temp = waitQue.front->data;
-    dequeueProcess(&waitQue);
+  for (t = 0; t < waitQueue.size; t++) {
+    temp = waitQueue.front->data;
+    dequeueProcess(&waitQueue);
     temp->bursts[temp->currentBurst].step++;
-    enqueueProcess(&waitQue, temp);
+    enqueueProcess(&waitQueue, temp);
   }
-  for (t=0; t<NUMBER_OF_PROCESSORS; t++){
+  for (t=0; t<NUMBER_OF_PROCESSORS; t++) {
     if (CPU[t]!=NULL){
       CPU[t]->bursts[CPU[t]->currentBurst].step++;
       clockRepresentedCPU++;     
@@ -141,14 +140,14 @@ void setupProcesses() {
   }
 
   //read in processes, calculate number of processes to be sorted
-  while (ReadIn = readProcess(&processes[numberOfProcesses])) {
-    if (ReadIn == 1) {  
+  while (readInput = readProcess(&processes[numberOfProcesses])) {
+    if (readInput == 1) {  
       numberOfProcesses++;
     }
   }
 }
 
-int checkErrors(int quantum, int quantumtwo) {
+int checkErrors(int quantum, int quantumTwo) {
   if (numberOfProcesses == 0 || numberOfProcesses > MAX_PROCESSES ) {
     return -1;
   }
@@ -157,7 +156,7 @@ int checkErrors(int quantum, int quantumtwo) {
     return -2;
   }
 
-  if (quantumtwo != NULL && (quantumtwo < 1 || quantumtwo > 2147483647 )) {
+  if (quantumTwo != NULL && (quantumTwo < 1 || quantumTwo > 2147483647 )) {
     return -2;
   }
 
@@ -168,21 +167,21 @@ int checkErrors(int quantum, int quantumtwo) {
 int main(int argc, char *argv[]){
   
   //initialize
-  initializeProcessQueue(&readyQue);
-  initializeProcessQueue(&waitQue);
+  initializeProcessQueue(&readyQueue);
+  initializeProcessQueue(&waitQueue);
   setupProcesses();
 
   int errors;
   
   if (argc == 2) {
-    quantumnumber = atoi(argv[1]);
-    errors = checkErrors(quantumnumber, NULL);
+    quantumOne = atoi(argv[1]);
+    errors = checkErrors(quantumOne, NULL);
   }
 
   if (argc == 3) {
-    quantumnumber = atoi(argv[1]);
-    quantumtwo = atoi(argv[2]);
-    errors = checkErrors(quantumnumber, quantumtwo);
+    quantumOne = atoi(argv[1]);
+    quantumTwo = atoi(argv[2]);
+    errors = checkErrors(quantumOne, quantumTwo);
   }
 
   if (errors == -1) {
@@ -197,7 +196,7 @@ int main(int argc, char *argv[]){
   qsort(processes, numberOfProcesses, sizeof(process), compareByArrival);
 
   //loop through processes
-  for (clockRepresented = 0; ProcessNextComCount <numberOfProcesses; clockRepresented++){
+  for (clockRepresented = 0; processNextCount < numberOfProcesses; clockRepresented++){
     moveIntoQueues();
     updateQueues();
   }
@@ -208,7 +207,7 @@ int main(int argc, char *argv[]){
   printf("Average turnaround time              : %.2f units\n", (turnAroundTimes / (double)numberOfProcesses));
   printf("Time all processes finished          : %d\n", clockRepresented - 1);
   printf("Average CPU utilization              : %.1f  %% \n", ((100 * clockRepresentedCPU)/(double)( clockRepresented-1)));
-  printf("Number of context switches           : %d\n", countextSwitch);
+  printf("Number of context switches           : %d\n", contextSwitch);
   printf("PID(s) of last process(es) to finish : ");
   for (i = 0; i<numberOfProcesses; i++) {
     if (processes[i].endTime == (clockRepresented-1)) {
