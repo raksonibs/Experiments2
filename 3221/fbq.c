@@ -30,8 +30,19 @@ int countextSwitch = 0;
 int quantumnumber = 0;
 int quantumtwo = 0;
 
+void setupPrintVariables() {
+  int i = 0;
+
+  //calculate and display values
+  while (i < numberOfProcesses){
+    waitTime = waitTime + processes[i].waitingTime;
+    turnAroundTimes = turnAroundTimes + processes[i].endTime - processes[i].arrivalTime;
+    i++;
+  }
+}
+
 //Move in code to the ready queue, waiting queue, CPU Processors
-void Move(){
+void moveIntoQueues(){
 
   for (i = 0; i < numberOfProcesses; i++){
     if (processes[i].arrivalTime == clockRepresented){
@@ -96,7 +107,7 @@ void Move(){
 }
 
 //update the queues
-void Update(){
+void updateQueues() {
   process * temp;
   int i;
   for (i= 0; i < readyQue.size; i++){
@@ -123,22 +134,7 @@ void Update(){
   }
 }
 
-
-//main code
-int main(int argc, char *argv[]){
-  
-  //initialize
-  initializeProcessQueue(&readyQue);
-  initializeProcessQueue(&waitQue);
-  
-  if (argc == 2)
-    quantumnumber = atoi(argv[1]);
-
-  if (argc == 3){
-    quantumnumber = atoi(argv[1]);
-    quantumtwo = atoi(argv[2]);
-  }
-
+void setupProcesses() {
   //clear all cpus
   for (i=0;i<NUMBER_OF_PROCESSORS;i++) {
     CPU[i] = NULL;
@@ -146,7 +142,55 @@ int main(int argc, char *argv[]){
 
   //read in processes, calculate number of processes to be sorted
   while (ReadIn = readProcess(&processes[numberOfProcesses])) {
-    if (ReadIn == 1) numberOfProcesses++;
+    if (ReadIn == 1) {  
+      numberOfProcesses++;
+    }
+  }
+}
+
+int checkErrors(int quantum, int quantumtwo) {
+  if (numberOfProcesses == 0 || numberOfProcesses > MAX_PROCESSES ) {
+    return -1;
+  }
+
+  if (quantum < 1 || quantum > 2147483647) {
+    return -2;
+  }
+
+  if (quantumtwo != NULL && (quantumtwo < 1 || quantumtwo > 2147483647 )) {
+    return -2;
+  }
+
+  return 0;
+}
+
+//main code
+int main(int argc, char *argv[]){
+  
+  //initialize
+  initializeProcessQueue(&readyQue);
+  initializeProcessQueue(&waitQue);
+  setupProcesses();
+
+  int errors;
+  
+  if (argc == 2) {
+    quantumnumber = atoi(argv[1]);
+    errors = checkErrors(quantumnumber, NULL);
+  }
+
+  if (argc == 3) {
+    quantumnumber = atoi(argv[1]);
+    quantumtwo = atoi(argv[2]);
+    errors = checkErrors(quantumnumber, quantumtwo);
+  }
+
+  if (errors == -1) {
+    error("Invalid number of processes");
+    return -1;
+  } else if (errors == -2) {
+    error_bad_quantum();
+    return -1;
   }
   
   //qsort processes
@@ -154,18 +198,11 @@ int main(int argc, char *argv[]){
 
   //loop through processes
   for (clockRepresented = 0; ProcessNextComCount <numberOfProcesses; clockRepresented++){
-    Move();
-    Update();
+    moveIntoQueues();
+    updateQueues();
   }
 
-  i = 0;
-
-  //calculate and display values
-  while (i < numberOfProcesses){
-    waitTime = waitTime + processes[i].waitingTime;
-    turnAroundTimes = turnAroundTimes + processes[i].endTime - processes[i].arrivalTime;
-    i++;
-  }
+  setupPrintVariables();
   
   printf("Average waiting time                 : %.2f units\n", ((double)waitTime/numberOfProcesses));
   printf("Average turnaround time              : %.2f units\n", (turnAroundTimes / (double)numberOfProcesses));

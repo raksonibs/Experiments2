@@ -172,6 +172,7 @@ void dequeueEnqueueWaitingBusts(int waitingIndex, int waitingQueueSize) {
 }
 
 int main(int argc, char *argv[]) {
+  int waitingIndex;
   setUpProcesses();
     // it reads pid, arrival_time, bursts to one element of the above struct array
 
@@ -212,7 +213,7 @@ int main(int argc, char *argv[]) {
     //sort waiting queue every cycle by processes priority (whoever finishes I/O burst first)
     int waitingQueueSize = waitingQueue.size;
     // iterate over queue, no index present
-    int waitingIndex;
+    
     for (waitingIndex = 0; waitingIndex < waitingQueueSize; waitingIndex++) {
       dequeueEnqueueWaitingBusts(waitingIndex, waitingQueueSize);
     }
