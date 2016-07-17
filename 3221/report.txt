@@ -2,7 +2,61 @@ Family Name: Niburski
 Given Name: Oskar
 Student Number: 212644944
 CS Login: raksonib
+Assignment: Project Report
 
 
-In this project, we were asked to implement three algorithms. These algorithims, 
+In this project, we were asked to implement three algorithms. These algorithms, First-come-first-serving (Fcfs), Round robin (rr), and three level feedback queue (FBQ), are all used to simulate three CPU scheduling techniques for multicore computing systems of four homogeneous CPUs.
+
+This report aims to explain the implemented algorithms, give an overview of all the experiments done on the schedulers. Lastly, it will provide optimal parameters for RR and FBQ with justifications.
+
+First, a brief introduction on schedulers. They select among processes in ready queue, and allocate the CPU to one of them.  There can be nonpreemptive and preemptive scheduling. CPU utilization is defined as keeping the CPU as busy as possible. Throughput is defined as number of processes that complete their execution per time unit. Turnaround time is amount of time to execute a particular process. Waiting time is amount of time processes have been waiting in ready queue. Response time is amount of time it takes from when a request was submitted until the first response is produced.
+
+First come, first served scheduling is the simplest of the three. The process that first requests the CPU is allocated to the CPI first. It is managed with a First in, first out queue. Once a process actually joins the ready queue, it is linked onto the tail of the queue. And when the CPU is free, it is reallocated to the process at the head of queue. The running process is then removed from the queue. The negative of FCFS, despite its simplicity, is that its waiting time is long if the first process is a very long process.  This is known as the convoy effect, where all other processes wait for the one big process to get off the CPI. As a result, lower CPU utilization would occur if shorter processes were allowed to go first. Furthermore, it is important to note that FCFS scheduling is nonpreemptive. 
+
+Round robin scheduling, unlike the FCFS algorithm, is actually built for time-sharing systems. Although it shares similarities to FCFS, preemption is actually added which allows the system to switch between processes.  The ready queue here is actually a circularly linked queue, where the cpu allocates the CPU to each process for a short period of time (known as a time quantum). The ready queue is a FIFO queue, and new processes are added to the tail of the ready queue. THe CPU still picks first process, but this time it sets a time limit of one quantum. The process either CPU busts for less than one time quantum and then is released, or timer will go off and cause an interrupt, which creates a context switch, placing the process at the tail of the ready queue. RR has a fairly long waiting average timing and is preemptive. Lastly, unlike FCFS, the performance of RR depends on the time unit (time quantum) allocated to each process. If it is incredibly large, the running time would increase significantly, however a  smaller RR provides many context switches. Thus there must be a balance between size and context switch time. 
+
+The FBQ, or three level queue scheduling, is an example of multilevel queue scheduling. In this type, processes are classified into foreground and background processes. The ready queue here is partitioned into several queues, and processes are assigned to one queue respectively, which is often compartmentalized based on a property of the process. Each queue implements it’s own scheduling algorithm. On the macroscopic level, there further must be scheduling not only in each respective queue, but amongst the queues themselves. This is done by a fixed priority preemptive scheduling. The processes can move between queues, thus if a processes uses too much CPU time in terms of its CPU burst, it can be moved to its lower priority queue. In this three level queue, queue 0 has the first priority, and it decreases numerically respectively. In this FBQ, the first process has a quantum of 8 milliseconds, the second queue has of 16 seconds, while the last and third queue has a FCFS implementation. Thus, the highest priority is to any processes with a CPU burst of 8 milliseconds or less. 
+
+The experiments done on all three algorithms are fairly standard. For example, using FCFS as an example, the first obvious test is to see if it compiles itself. This is done via this command `gcc –Wall –o fcfs  fcfs.c sch-helpers.c`. After which, running the code is as follows: `fcfs  < CPULoad.dat`. For the other programs, the compile process is very similar, however there are additional arguments in the execution step. For example, for RR `rr 2  < CPULoad.dat` and fbq `fbq 10 30  < CPULoad.dat` each have a time slice command provided to them.
+
+Beyond these initial tests, other tests are running the code without a file. This should provide an error message. Another test implemented was without the timeslice argument in the second two scheduling algorithms. Each time an argument is missing in the actual execution line, an error has to be thrown.
+
+In terms of optimal parameters for the RR and FBQ scheduling algorithms, according to my analysis, the optimal parameter for RR is 15, while the optimal is 11 and 30 for q1 and q2 respectively.  The reason for RR’s optimal value is that there must be a balance between context switching and quantum time assigned. Too large of a value causes a long delay for processes, whereas a small value means more interrupts and context switching. As a result, 15 is a small enough value to balance this. You can actually see this with the quantum time of 15 compared to 14 and 16 respectively:
+~/D/f/j/3221 (master↑3|✚ 2) $ ./rr 14 < CPULoad.dat
+Average waiting time                 : 19.07 units
+Average turnaround Time              : 36239.86 units
+Time all processes finished          : 63212
+Average CPU utilization              : 83.1%
+Number of context switches           : 1919
+~/D/f/j/3221 (master↑3|✚ 2) $ ./rr 15 < CPULoad.dat
+Average waiting time                 : 17.14 units
+Average turnaround Time              : 36238.52 units
+Time all processes finished          : 62486
+Average CPU utilization              : 83.9%
+Number of context switches           : 1738
+~/D/f/j/3221 (master↑3|✚ 2) $ ./rr 16 < CPULoad.dat
+Average waiting time                 : 17.79 units
+Average turnaround Time              : 36238.66 units
+Time all processes finished          : 63213
+Average CPU utilization              : 83.1%
+Number of context switches           : 1603
+
+With FBQ, the optimal parameters were with similar justifications, as the first two queues were implemented in a similar fashion to RR wherein the last was an FCFS. Here is the result for 11 and 30 for FBQ, and noticed the average waiting time compared to 15 and 30:
+~/D/f/j/3221 (master↑3|✚ 2) $ ./fbq 11 30 < CPULoad.dat
+Average waiting time                 : 18.17 units
+Average turnaround time              : 40857.24 units
+Time all processes finished          : 68553
+Average CPU utilization              : 77.1  %
+Number of context switches           : 634
+PID(s) of last process(es) to finish : 28
+~/D/f/j/3221 (master↑3|✚ 2) $ ./fbq 15 30 < CPULoad.dat
+Average waiting time                 : 18.17 units
+Average turnaround time              : 40857.24 units
+Time all processes finished          : 68553
+Average CPU utilization              : 77.1  %
+Number of context switches           : 632
+PID(s) of last process(es) to finish : 28
+
+Ultimately, this project aimed to show three scheduling algorithms and have a comparison of the implementation of each of them respectively. 
+
 
