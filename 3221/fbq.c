@@ -30,6 +30,7 @@ int contextSwitch = 0;
 int quantumOne = 0;
 int quantumTwo = 0;
 
+// setup print variables
 void setupPrintVariables() {
   int i = 0;
 
@@ -43,7 +44,7 @@ void setupPrintVariables() {
 
 //Move in code to the ready queue, waiting queue, CPU Processors
 void moveIntoQueues(){
-
+  // unqueue the processes into ready Queue
   for (i = 0; i < numberOfProcesses; i++){
     if (processes[i].arrivalTime == clockRepresented){
       processes[i].currentQueue = 1;
@@ -51,11 +52,13 @@ void moveIntoQueues(){
     }
   }
 
+  // get the front in queue and deqeueu teh wait queue
   for (i = 0; i < waitQueue.size; i++){
     process *queueFront = waitQueue.front->data;
     dequeueProcess(&waitQueue);
-
-    if (queueFront->bursts[queueFront->currentBurst].step >= queueFront->bursts[queueFront->currentBurst].length){    
+    // if the front of the queue is equal to the current burst, then you enqueue the front process into the ready queue
+    // if not, then enqeueue it into the wait queue
+    if (queueFront->bursts[queueFront->currentBurst].step >= queueFront->bursts[queueFront->currentBurst].length) {    
       queueFront->currentBurst++;
       enqueueProcess(&readyQueue, queueFront);
     }
@@ -64,6 +67,7 @@ void moveIntoQueues(){
     }
   }
 
+  //loop through number of processes
   int t;
   for (t = 0; t < NUMBER_OF_PROCESSORS; t++){    //Number of Processors = 4
     if (CPU[t] != NULL) {
@@ -78,13 +82,14 @@ void moveIntoQueues(){
           processNextCount++;          
         }
         else {
+          // if not finished yet, move to the wait queue
           enqueueProcess(&waitQueue, CPU[t]);
         }
         CPU[t] = NULL;
       // Check if quantum expired
       } else {
         if (CPU[t]->quantumRemaining <= 0){ 
-          // increment queue count (FBQ)
+          // increment queue count
           CPU[t]->currentQueue++;       
           enqueueProcess(&readyQueue, CPU[t]);
           CPU[t]=NULL;
@@ -92,10 +97,10 @@ void moveIntoQueues(){
         }
       }     
     }
-    // add new process
+    // add new process from front and then dequeue it
     if (CPU[t] == NULL && readyQueue.size > 0){
       CPU[t] = readyQueue.front->data;
-      if (CPU[t]->currentQueue == 1){
+      if (CPU[t]->currentQueue == 1) {
         CPU[t]->quantumRemaining = quantumOne;
       }
       else {
@@ -111,19 +116,23 @@ void updateQueues() {
   process * temp;
   int i;
   for (i= 0; i < readyQueue.size; i++) {
+    // take the readyQueue and dequeue it for each process in ready queue
     temp = readyQueue.front->data;
     temp->waitingTime++;
     dequeueProcess(&readyQueue);
     enqueueProcess(&readyQueue,temp);
   }
+
   temp = NULL;
   int t;
   for (t = 0; t < waitQueue.size; t++) {
+    // take the waitQueue and dequeue it for each process in wait queue
     temp = waitQueue.front->data;
     dequeueProcess(&waitQueue);
     temp->bursts[temp->currentBurst].step++;
     enqueueProcess(&waitQueue, temp);
   }
+  // update each process in cpu
   for (t=0; t<NUMBER_OF_PROCESSORS; t++) {
     if (CPU[t]!=NULL){
       CPU[t]->bursts[CPU[t]->currentBurst].step++;
@@ -133,6 +142,7 @@ void updateQueues() {
   }
 }
 
+// simple to setup into null array on initalization
 void setupProcesses() {
   //clear all cpus
   for (i=0;i<NUMBER_OF_PROCESSORS;i++) {
@@ -147,6 +157,7 @@ void setupProcesses() {
   }
 }
 
+// simple check errors method
 int checkErrors(int quantum, int quantumTwo) {
   if (numberOfProcesses == 0 || numberOfProcesses > MAX_PROCESSES ) {
     return -1;
@@ -173,6 +184,7 @@ int main(int argc, char *argv[]){
 
   int errors;
   
+  // argument error check
   if (argc == 2) {
     quantumOne = atoi(argv[1]);
     errors = checkErrors(quantumOne, NULL);
@@ -202,7 +214,7 @@ int main(int argc, char *argv[]){
   }
 
   setupPrintVariables();
-  
+  // print
   printf("Average waiting time                 : %.2f units\n", ((double)waitTime/numberOfProcesses));
   printf("Average turnaround time              : %.2f units\n", (turnAroundTimes / (double)numberOfProcesses));
   printf("Time all processes finished          : %d\n", clockRepresented - 1);
