@@ -139,3 +139,167 @@ preempted and moved to queue Q2
 - backing store: fast disk to acccomodate copies of all memory images for all uses; must provide direct access to these memory images
 - roll out roll in: swapping variant used for priority based scheduling aloghtims. 
 - system maintins ready queue of ready to run processes
+- if next processnot in memeory need to swap out process and swap in target process. context switch very high
+- double buffering is contrast always tranfer i/o to kernal space, then i/o device. this adds overhead
+- not typically support to swap on mobile systems. flash memory based. usually just ask to reliniquish memory if memory low
+- contiguous allocation: main memory. limited resouce. usually in two partions, the resident operating system, usually held in low memory with interrupt vector. user processes held in high memory. each process contained in single continguous section of memory
+- reloaction registers used to protect processes. base register contains value of smalllest physical address. limit register contains range of logical addresses, ach logical address must be less than limit register. MMU maps logical address dynamically. allow kernel bode being transient and changing size
+- degree of multiprogramming limited by number of partitions
+- variable partion sizes for efficenciy
+- hole: block of memory available
+- when process arrives it is allocated memory from a hole large enough to accommodate it
+- process exiting frees partition
+- dynamic storagge allocation problem: firstfit: allocate the first hole big enough. Best-fit: allocate smallest hole that is big enough. Worst fit: largest hole
+- external fragmentation: total memory space exists to satisfy a request, but it is not contiguous
+- internal fragmentation: allocatied memory may be slightly larger than requested memory.
+- 0.5N blocks lost to fragmenetation: 50% rule
+- reduce extenral fragamaention by compaction: shuffle memory contents to place all free memory in one block. only possible if relocation dynamic and done at execution time
+- segmentation: logical unit of memory
+- logical address consists of two tuple <segment number, offset>. Segment table: maps two dimensional physical address that has base: starting physical adrdress, and limit: specifics the length of the segment
+-segment number is legel if s < STLY (segment length register)
+- protection bits have a validation bit with read/write/execute priveleges
+- paging: physical adddress space of process can be noncontiguoes, avoids external fragmation. avoids problem of varying sized memory chunks.
+- divide physical memory into frames. Didive memory into blocks call pages.
+- address translation scheme: address generated into page number for page talbe, and page offset combined with base address to define physical memory
+- two memory problem solved by lookup hardware case called translation look-aside buffers. TLBs store address-space identifiers which uniquely identify each process to provide address space protection for that process. otherwise need to flush at every context switch. if miss, value is loaded for faster access next time. can be wired down for permananet fast access
+- associative memory: parallel search if p is in register, get frame out. 
+- effective access time: 2 + E - a where A is hit ratio, perfcentage of time page number is found in associated registers. E is associative lookup
+-memory protection implemented by associating prtoection bit with each frame to indiciate if read-only or read-write acess allowed. Valid invalid bit attached to each entry in page table. 
+= shared pages: one copy of rentrant, readonly code
+- structure of page table: memory strucutres for paging can be:
+  - heirrachical page tables: break up the logical address space into multiple page tables. ex: 32 bit machine split into page number of 22 bits and page offset of 10 bits. The page number is further divided into a 12 bit page number and 10 big offset
+  - known as forward mapped page table
+  - hashed page tables: virtual page is hashed into a page table which contains chain of elements hashing to same location. Each element contians virtual page nuber, value of mapped page frame, and pointer to next element. virtual page numbers are compared in this chain searching for a match. could be clustered page tables with each hash refers to several pages
+  - inverted page table: track all pages, one entry to each real page of memory. entry consits of virtual address of page stored in real memory.
+  -
+
+  - code needs to be in memory butentire rpgraom rarlery used
+  - partially loaded program: not constarineted by limits of phyiscal memory. each program takes less memory while running
+    - increased cpu uitlization
+    less i/o needed to swap programs
+- virtual memory: speartion of logical memory from physical memory
+  - only part needs to be in memory for exection. soe much larger physical address space
+  - virtual address space usually start at address 0, contiginous until end of space. physical memory organized in page grames
+- design logical address space for stack to start at max logical space and grown down while heap grows up
+- unused space between two is hole
+- enables sparse address space with holes left for growth
+- demand paging: could bring entire process into memory at load time, or bring when needed. page is needed => refrence it
+- lazy swapper: never swaps a page into memory unless page will be needed. 
+- with swapping, pager guesses which pages will be used before swapping out again
+- instead pager brings in only those pages
+- if pages are needed are already memory resident no difference from nondemand paging. if not, need to detect and load page into memory from storage
+= valid/invalid bit is associated in memory. v is in memory and memory rsident, i not in memory. intially all is set to i
+- during MMU address translation, if i, entry is page fault
+- if there is a reference to page, first refecne to that page will trap to operating system: page fault
+- if page fault, just find free frame and swap page intro gramde via scheduled disk operation
+- reference, trap, page is on backing store, bring in missing page, reset page talbe, restart
+
+- aspcets of demand paging:
+  - extreme case: start process with no pages in memory
+  - pure demand paging
+- could be multiple page faults: pain decreased because of locality of reference. 
+- hardaware support for demand paging: page table with valid/invalid bit, secondary memory with swap space, insctruction restart
+- instruction restart:
+  - block move, auto increment/decrement location
+- performance of demang paging:
+  - service the interupt, read the page, restart the process
+  - effectve access time: 
+- optomize demand paging: swap space i/o faster than file system, copy entire process image to swap space at process load time
+- 
+
+- copy on write: allows both parent and child process to initally share same pages in memory
+- free pages allocated rfrom a pool of zero-fill-on-demand pages: vfork()
+- if no free frame: page replacement. same page brought many times into meomry
+- page replacement: prevent overallocation of memory by modifiginy serivce tourinte or use dirty bit to reduce overhead
+- find location of page, find free frame, bring into free frame
+- frame allocation algorthim, page replacement algorthim
+-fifo algorthim: Belady's anomly: more frames casue more page faults
+- optimal algorthim: replace page that will not be used for longest period of time.
+-least recentyl used algorthimg, past knowldge rather than future
+-counter immpentation or stack implemtnation
+-LRU needs refernce bit and second changce algrothim 
+- page buffering algorthims: keep a pool of freen frames,
+-memory intensive applcations have double buffering: os keeps copy aof memory, so does applciation
+-fixed allocation:
+  - equal allocation for all processes
+  - proprtional allocation, according to size of process
+  - priortiy allocation: use proprtional using priotties rather than size
+  - 
+- global replacement: process selects replacement frame from all other frames, process excution time varies greatly, but thorughout greater.
+- local replacement: slects from own local frames, more consistent
+- many memory systems are nonuniform memory acesss
+- optimal preforamnce comes from allocation memory close to cpu on which thread is schedueld
+- thrashing: if a process does not have enough pages, page fault rate is so high. thrasing = a process is busy swapping pages in and out
+- locality model: process migrates from one to another. thrasing occurs when size of locatiy > total memory size
+- working set model: total number of pages referneces in most recent. if too small, not encompas everyhing, if too large encomopes all locailitys. if D > M, thrrasing. D is total deman frames. so if d is more than all working set frames, thrasing
+- establish acceptable page falut frequency, if too low process loses frame but gains frame when too hgih
+- direct relationship between working set of process and page fault rate. 
+- memory mapped fiels: file to be trated as routine memory acess by mapping a disk block to a page in memory.allows several processes to map the same file allowing the pages in memory to be shared
+- mmap()
+-buddy system: allocations memory from a fixed sixed segment of phyicsally ocntinugos pages. allocated using powerof2 allocatioer. requets in units sized power of 2. avdvantge: quickly coalsce unused chunks into larger, disadvantage: fragementation
+-slab allocation: single cache for each unique kernal data strcture. filled with objcets, when cahce created objects marked as free, when stored marked as used. when all full, allocated from empry slab. if no new slabes, new slab allocation. no fragementions
+- pages must sometimes be locked into memory. pinning of pages to lock into memory
+-
+
+- principles of least protection:
+  - given just enough privelges
+  - limits damage if bug or gets abused
+  - or dynamic with domain switchingg, privelge escalation
+  - grain aspect: rough grained privleage management easier, simpler but least privelged
+- domain strucutre: access-right: where rigghts-set is a subset of all valid operations that can be performed on the object
+- domain implenation: user-id, domain switch accomplaied via file system. each file has associated domain bit. set user id during execution, reset when done
+- domain switch accomplied via sudo
+- multics: two domain rings with n - 1rings: mutlics benefits: ring hieriracl structure provided more than basic kernel, fairly complex more overhead
+  - object accebile in D, not d i then j < i
+  -every element in Di is accessible in Dj
+- access matrix: view protection as a matrix. rows represent domains, columns represent objects. access(i, j)
+-access matrix separates mechanism from policy. 
+  - mehcnaism: ensures matrix is only manipulated by authorized agents and that rules are stirclty enforced. user dictteas policy. doens-t solve general confinement problem
+-copy rights vs owner rights
+- store ordered triple in table. but won;t fit in main memory
+- instead use acces list for objects. each column impleneted as an access lsit for object. resulting lists is <domain, rights-set>
+- each column thus is the access control list for one object,  and defines who can perform what object
+- each row: capability, show what operatins are allowed
+- third options: instead of object based, domain is list based. capcility list for domain is list of objects togher with operations allowed. object represents by addres aka capability
+-process requests operation and specifcs capability as parameter
+- capbility list associated with domain but never directly accessible by domain.
+- lockkey: compormise between access lists and caiblity lists. each opbject has unique bit patterns, called locks. each domains has list of unique bit patterns called keys. process in domain can only access object if domain has key that matches one of the locks
+-global table simple, capbility list useful for locating, lockkey effective and flexible
+-usually access list and cababilityes: first access an object via access list then crate capability
+-role based access control to implement least privilege: privlege is right to excute cole. user roles
+- revocation of access rights
+- delete access list with acces rights
+-remove capbility list: reacquistion, 
+
+- theft of service: unautorized use of reosuces
+- denial of service: prevention of legimiate use
+- masquering (breach authentication)
+- replacy attack, main in the middle
+- session hijacking
+- trojan horse:
+  - code segement misuses env. explortsfor allowing probgram to be executed by other users
+- trap door:
+  - specific user identify
+- logic bomb
+- stackbuffer overflow
+  - write past arguments on stack into return address of stack, when rotuine returns to call, returns to hacked address
+- some systems open rather than secure by defualt to recduce attack surface.
+- network threats: worms, swpan
+- crpyotgraphy to constrain potential senders or desintactio via secrey keys
+-encrtpion: constain set of possible receivers. k keys, m messages, c ciphertexts
+- can only comput message if it posses k and ciphertext
+- assymetric enctrion: public key and private key only known t indivudal user
+- usually RSA block cipher (detect if number is prime or not)
+- ke is public key, kd is private key. N is product of two large random numbers.  D(c) = c **K mod(n)
+-syymetric based on transformactions, assymetric based on matehcmaitlca functions
+- computer holding k can generate authenticators on messages.
+- hash functions are basis of authentication. creates small fixed message digets. 
+- must be colision resistant.
+- symmetric encription used in message authencatin code algorthim
+- digital signatued based on assmyricate keys. very usuael as anyone can verifiy authenticiy of message. 
+- key distribution when syymetric someimtes done out of badn. assymetric kets stored on key ring
+- digital certificates: proof of who owns public key. 
+- example: ssl: at one layer of iso netowkr model at transport layer.
+- limits only two computers to do it.
+- server is veried with certificate assuing client talking to correct server with asymmetric cryptography used to establish a secure session key for bulk communication
+- 
